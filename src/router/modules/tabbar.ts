@@ -34,7 +34,7 @@ export default [
   {
     path: '/profile',
     name: 'Profile',
-    component: () => import('@/views/PlaceholderView.vue'),
+    component: () => import('@/views/profile/index.vue'),
     meta: {
       title: '我的',
       icon: 'user-o',

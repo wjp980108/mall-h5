@@ -1,0 +1,11 @@
+.idea
+.vscode
+# 提交项目共享的 skills，忽略其他本地 Agent 配置。
+
+.claude/*
+!.claude/skills
+.codex/*
+!.codex/skills
+
+node_modules
+dist

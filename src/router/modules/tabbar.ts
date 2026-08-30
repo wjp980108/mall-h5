@@ -1,0 +1,40 @@
+import type { RouteRecordRaw } from 'vue-router';
+
+export default [
+  {
+    path: '/home',
+    name: 'Home',
+    component: () => import('@/views/PlaceholderView.vue'),
+    meta: {
+      title: '首页',
+      icon: 'wap-home-o',
+    },
+  },
+  {
+    path: '/category',
+    name: 'Category',
+    component: () => import('@/views/PlaceholderView.vue'),
+    meta: {
+      title: '分类',
+      icon: 'apps-o',
+    },
+  },
+  {
+    path: '/cart',
+    name: 'Cart',
+    component: () => import('@/views/PlaceholderView.vue'),
+    meta: {
+      title: '购物车',
+      icon: 'cart-o',
+    },
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('@/views/PlaceholderView.vue'),
+    meta: {
+      title: '我的',
+      icon: 'user-o',
+    },
+  },
+] satisfies RouteRecordRaw[];

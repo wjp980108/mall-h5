@@ -1,0 +1,71 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Build job to build Vue.js project
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: latest
+
+      # Set up Node.js environment using .nvmrc file and cache pnpm
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          # Two cache methods choose one
+          cache: pnpm
+
+      # Install dependencies using pnpm
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build the project
+        run: pnpm build
+
+      # Upload dist directory as artifact
+      - name: Upload dist directory
+        uses: actions/upload-artifact@v6
+        with:
+          name: dist
+          path: ./dist
+
+  # Deploy job to transfer build files to Windows server
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      # Download dist files from build job
+      - name: Download dist files
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: ./dist
+
+      # Transfer files to server using rsync (with --delete to remove old files)
+      - name: Deploy via rsync
+        uses: burnett01/rsync-deployments@v8
+        with:
+          switches: -avz --delete --exclude='.user.ini'
+          path: ./dist/
+          remote_path: ${{ secrets.SERVER_TARGET }}
+          remote_host: ${{ secrets.SERVER_HOST }}
+          remote_port: ${{ secrets.SERVER_PORT }}
+          remote_user: ${{ secrets.SERVER_USER }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}

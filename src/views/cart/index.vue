@@ -43,7 +43,7 @@ function handleSubmit() {
             <h2 class="cart-item__name">
               {{ item.name }}
             </h2>
-            <p class="cart-item__specification">
+            <p v-if="item.specification" class="cart-item__specification">
               {{ item.specification }}
             </p>
             <div class="cart-item__bottom">

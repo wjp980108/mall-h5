@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { HomePageData } from '@/api/home.ts';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { fetchHomePage } from '@/api/home.ts';
 
 defineOptions({ name: 'HomePage' });
 
 const keyword = ref('');
+const router = useRouter();
 const homeData = ref<HomePageData>({
   banners: [],
   notices: [],
@@ -77,6 +79,10 @@ async function handleLoad() {
     loading.value = false;
   }
 }
+
+function openProductDetail(productId: string) {
+  router.push({ name: 'ProductDetail', params: { id: productId } });
+}
 </script>
 
 <template>
@@ -137,6 +143,10 @@ async function handleLoad() {
               <div
                 v-for="product in homeData.products.list" :key="product.id"
                 class="waterfall-list__item product-card"
+                role="button"
+                tabindex="0"
+                @click="openProductDetail(product.id)"
+                @keydown.enter="openProductDetail(product.id)"
               >
                 <van-image
                   class="product-card__image"
@@ -145,6 +155,9 @@ async function handleLoad() {
                   width="100%"
                 />
                 <div class="product-card__info">
+                  <h2 class="product-card__name">
+                    {{ product.name }}
+                  </h2>
                   <span class="product-card__price">¥{{ product.price }}</span>
                   <span class="product-card__sales">已售 {{ product.salesCount }}</span>
                 </div>
@@ -229,10 +242,21 @@ async function handleLoad() {
 
         &__info {
           display: flex;
-          align-items: baseline;
-          justify-content: space-between;
-          gap: 8px;
+          flex-wrap: wrap;
+          gap: 6px 8px;
           padding: 10px;
+        }
+
+        &__name {
+          width: 100%;
+          margin: 0;
+          overflow: hidden;
+          color: #323233;
+          font-size: 14px;
+          font-weight: 500;
+          line-height: 20px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         &__price {

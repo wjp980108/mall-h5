@@ -12,12 +12,12 @@ export default [
     },
   },
   {
-    path: '/category',
-    name: 'Category',
-    component: () => import('@/views/PlaceholderView.vue'),
+    path: '/flash-sale',
+    name: 'FlashSale',
+    component: () => import('@/views/flash-sale/index.vue'),
     meta: {
-      title: '分类',
-      icon: 'apps-o',
+      title: '抢购',
+      icon: 'fire-o',
       keepAlive: true,
     },
   },

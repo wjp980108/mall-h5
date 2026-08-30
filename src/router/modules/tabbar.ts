@@ -24,7 +24,7 @@ export default [
   {
     path: '/cart',
     name: 'Cart',
-    component: () => import('@/views/PlaceholderView.vue'),
+    component: () => import('@/views/cart/index.vue'),
     meta: {
       title: '购物车',
       icon: 'cart-o',

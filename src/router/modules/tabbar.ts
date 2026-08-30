@@ -4,7 +4,7 @@ export default [
   {
     path: '/home',
     name: 'Home',
-    component: () => import('@/views/PlaceholderView.vue'),
+    component: () => import('@/views/home/index.vue'),
     meta: {
       title: '首页',
       icon: 'wap-home-o',

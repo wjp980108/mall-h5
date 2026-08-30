@@ -26,3 +26,11 @@ function handleBack() {
     @click-left="handleBack"
   />
 </template>
+
+<style scoped lang="scss">
+.app-navbar {
+  --van-nav-bar-background: var(--van-primary-color);
+  --van-nav-bar-icon-color: #fff;
+  --van-nav-bar-title-text-color: #fff;
+}
+</style>

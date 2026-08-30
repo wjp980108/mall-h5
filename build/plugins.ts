@@ -1,11 +1,9 @@
-import type { ComponentResolver } from 'unplugin-vue-components';
 import type { Plugin } from 'vite';
 import fs from 'node:fs';
 import path from 'node:path';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import UnoCSS from 'unocss/vite';
-import Components from 'unplugin-vue-components/vite';
 import compressPlugin from 'vite-plugin-compression';
 import vueDevTools from 'vite-plugin-vue-devtools';
 

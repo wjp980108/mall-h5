@@ -30,10 +30,6 @@
 </template>
 
 <style scoped lang="scss">
-.product-detail {
-  min-height: calc(100dvh - var(--mall-navbar-height));
-}
-
 .product-detail__content {
   padding-bottom: calc(76px + env(safe-area-inset-bottom));
 }

@@ -8,6 +8,7 @@ export default [
     meta: {
       title: '首页',
       icon: 'wap-home-o',
+      keepAlive: true,
     },
   },
   {
@@ -17,6 +18,7 @@ export default [
     meta: {
       title: '分类',
       icon: 'apps-o',
+      keepAlive: true,
     },
   },
   {
@@ -26,6 +28,7 @@ export default [
     meta: {
       title: '购物车',
       icon: 'cart-o',
+      keepAlive: true,
     },
   },
   {
@@ -35,6 +38,7 @@ export default [
     meta: {
       title: '我的',
       icon: 'user-o',
+      keepAlive: true,
     },
   },
 ] satisfies RouteRecordRaw[];

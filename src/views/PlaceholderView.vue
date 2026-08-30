@@ -17,7 +17,6 @@ const title = computed(() => route.meta.title);
 <style scoped lang="scss">
 .placeholder {
   display: flex;
-  min-height: calc(100dvh - var(--mall-navbar-height) - var(--mall-tabbar-height) - env(safe-area-inset-bottom));
   flex-direction: column;
   align-items: center;
   justify-content: center;

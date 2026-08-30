@@ -11,5 +11,7 @@ declare module 'vue-router' {
     icon?: string;
     // 是否缓存当前页面
     keepAlive?: boolean;
+    // 是否允许未登录访问，默认需要登录
+    requiresAuth?: boolean;
   }
 }

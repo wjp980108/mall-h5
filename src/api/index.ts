@@ -5,12 +5,34 @@ export interface LoginReq {
   password: string;
 }
 
+export interface LoginResult {
+  token: string;
+}
+
+export interface RegisterReq {
+  username: string;
+  password: string;
+  phone: string;
+  inviteCode?: string;
+}
+
 // 登录
 export function login(data: LoginReq) {
-  return request({
+  return request<LoginResult>({
     url: '/api/auth/login',
     method: 'post',
     data,
+  });
+}
+
+// 注册
+export function register(data: RegisterReq) {
+  return request<unknown>({
+    url: '/api/auth/register',
+    method: 'post',
+    data,
+  }, {
+    loading: '注册中...',
   });
 }
 

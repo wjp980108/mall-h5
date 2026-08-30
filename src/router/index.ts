@@ -35,17 +35,9 @@ export async function installRouter(app: App) {
   router.beforeEach((to) => {
     const userStore = useUserStore();
 
-    // 未登录，处理非登录页面重定向
-    if (!userStore.accessToken) {
-      if (to.path !== '/login') {
-        return '/login';
-      }
-      return;
-    }
-
-    // 已登录，访问登录页重定向到首页
-    if (to.path === '/login') {
-      return { path: VITE_HOME_PATH };
+    // 未登录时，默认跳转登录页；公开页面通过路由元信息声明。
+    if (!userStore.accessToken && to.meta.requiresAuth !== false) {
+      return '/login';
     }
   });
 

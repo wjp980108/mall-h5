@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
+
 interface ProfileInfo {
   name: string;
   phone: string;
@@ -7,6 +9,7 @@ interface ProfileInfo {
 interface MenuItem {
   title: string;
   icon: string;
+  routeName?: 'AddressList';
 }
 
 interface MenuGroup {
@@ -15,6 +18,8 @@ interface MenuGroup {
 }
 
 defineOptions({ name: 'ProfilePage' });
+
+const router = useRouter();
 
 const profile: ProfileInfo = {
   name: '商城用户',
@@ -41,13 +46,18 @@ const menuGroups: MenuGroup[] = [
   },
   {
     items: [
-      { title: '我的地址', icon: 'location-o' },
+      { title: '我的地址', icon: 'location-o', routeName: 'AddressList' },
       { title: '我的邀请码', icon: 'friends-o' },
       { title: '分销中心', icon: 'chart-trending-o' },
       { title: '收款管理', icon: 'balance-o' },
     ],
   },
 ];
+
+function handleMenuClick(item: MenuItem) {
+  if (item.routeName)
+    router.push({ name: item.routeName });
+}
 </script>
 
 <template>
@@ -82,6 +92,7 @@ const menuGroups: MenuGroup[] = [
           :title="item.title"
           :icon="item.icon"
           is-link
+          @click="handleMenuClick(item)"
         />
       </van-cell-group>
     </section>

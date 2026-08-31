@@ -9,11 +9,13 @@ import { setDocumentTitle } from '@/utils/common';
 const { BASE_URL, VITE_HOME_PATH } = import.meta.env;
 
 // 业务路由模块：自动挂载到 Layout 下（排除 tabbar 与 remaining）
-const businessModules = import.meta.glob<{ default: RouteRecordRaw }>(
+const businessModules = import.meta.glob<{ default: RouteRecordRaw | RouteRecordRaw[] }>(
   ['./modules/*.ts', '!./modules/tabbar.ts', '!./modules/remainingRouter.ts'],
   { eager: true },
 );
-const businessRoutes = Object.values(businessModules).map(mod => mod.default);
+const businessRoutes = Object.values(businessModules).flatMap(({ default: routes }) =>
+  Array.isArray(routes) ? routes : [routes],
+);
 
 // Layout 作为容器，业务路由挂载到其 children 下
 const routes: RouteRecordRaw[] = [

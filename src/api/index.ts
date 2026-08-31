@@ -12,23 +12,27 @@ export interface LoginResult {
 export interface RegisterReq {
   username: string;
   password: string;
-  phone: string;
+  phone?: string;
+  nickname?: string;
+  email?: string;
   inviteCode?: string;
 }
 
 // 登录
 export function login(data: LoginReq) {
   return request<LoginResult>({
-    url: '/api/auth/login',
+    url: '/api/app/auth/login',
     method: 'post',
     data,
+  }, {
+    loading: '登录中...',
   });
 }
 
 // 注册
 export function register(data: RegisterReq) {
   return request<unknown>({
-    url: '/api/auth/register',
+    url: '/api/app/auth/register',
     method: 'post',
     data,
   }, {

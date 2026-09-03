@@ -9,7 +9,7 @@ interface ProfileInfo {
 interface MenuItem {
   title: string;
   icon: string;
-  routeName?: 'AddressList' | 'PaymentManagement';
+  routeName?: 'AddressList' | 'InviteCode' | 'PaymentManagement';
 }
 
 interface MenuGroup {
@@ -47,7 +47,7 @@ const menuGroups: MenuGroup[] = [
   {
     items: [
       { title: '我的地址', icon: 'location-o', routeName: 'AddressList' },
-      { title: '我的邀请码', icon: 'friends-o' },
+      { title: '我的邀请码', icon: 'friends-o', routeName: 'InviteCode' },
       { title: '分销中心', icon: 'chart-trending-o' },
       { title: '收款管理', icon: 'balance-o', routeName: 'PaymentManagement' },
     ],

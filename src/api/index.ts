@@ -9,6 +9,26 @@ export interface LoginResult {
   token: string;
 }
 
+export interface CurrentUser {
+  id: number;
+  username: string;
+  nickname: string;
+  phone: string;
+  avatar: string;
+  avatarPlatform: string | null;
+}
+
+export interface UpdateCurrentUserInfo {
+  nickname?: string;
+  avatar?: string;
+  avatarPlatform?: string;
+}
+
+export interface ChangePasswordPayload {
+  phone: string;
+  password: string;
+}
+
 export interface RegisterReq {
   username: string;
   password: string;
@@ -42,8 +62,32 @@ export function register(data: RegisterReq) {
 
 // 获取用户信息
 export function fetchUserInfo() {
-  return request<unknown>({
-    url: '/api/users/user-info',
+  return request<CurrentUser>({
+    url: '/api/app/user/info',
+  });
+}
+
+// 更新用户信息
+export function updateUserInfo(data: UpdateCurrentUserInfo) {
+  return request({
+    url: '/api/app/user/info',
+    method: 'put',
+    data,
+  }, {
+    loading: '保存中...',
+    successMessage: '资料已保存',
+  });
+}
+
+// 修改密码
+export function changePassword(data: ChangePasswordPayload) {
+  return request({
+    url: '/api/app/user/password',
+    method: 'put',
+    data,
+  }, {
+    loading: '修改中...',
+    successMessage: '密码已修改，请重新登录',
   });
 }
 
@@ -87,7 +131,7 @@ export function uploadFile(params: FormData) {
 // 上传图片
 export function uploadImage(data: FormData) {
   return request({
-    url: '/api/file/upload',
+    url: '/api/app/file/upload',
     method: 'post',
     data,
     headers: {

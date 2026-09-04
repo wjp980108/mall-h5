@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
 
 interface ProfileInfo {
   name: string;
@@ -21,10 +23,15 @@ defineOptions({ name: 'ProfilePage' });
 
 const router = useRouter();
 
-const profile: ProfileInfo = {
-  name: '商城用户',
-  phone: '138****8888',
-};
+const userStore = useUserStore();
+const profile = computed<ProfileInfo>(() => ({
+  name: userStore.userInfo.nickname || userStore.userInfo.username || '商城用户',
+  phone: userStore.userInfo.phone ? userStore.userInfo.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') : '未绑定手机号',
+}));
+const avatarUrl = computed(() => {
+  const { avatar } = userStore.userInfo;
+  return !avatar || /^(?:https?:)?\/\//.test(avatar) ? avatar : new URL(avatar, import.meta.env.VITE_BASE_URL).toString();
+});
 
 const menuGroups: MenuGroup[] = [
   {
@@ -62,25 +69,25 @@ function handleMenuClick(item: MenuItem) {
 
 <template>
   <div class="profile-page">
-    <section class="profile-card" aria-label="用户信息">
+    <div class="profile-card">
       <div class="profile-card__avatar" aria-hidden="true">
-        <van-icon name="user-circle-o" />
+        <van-image v-if="avatarUrl" :src="avatarUrl" fit="cover" round />
+        <van-icon v-else name="user-circle-o" />
       </div>
       <div class="profile-card__info">
         <strong>{{ profile.name }}</strong>
         <span>{{ profile.phone }}</span>
       </div>
-      <button class="profile-card__settings" type="button">
+      <button class="profile-card__settings" type="button" @click="router.push({ name: 'ProfileSettings' })">
         <van-icon name="setting-o" />
         <span>设置</span>
       </button>
-    </section>
+    </div>
 
-    <section
+    <div
       v-for="(group, groupIndex) in menuGroups"
       :key="groupIndex"
       class="profile-menu"
-      :aria-label="group.title || '个人服务'"
     >
       <h2 v-if="group.title" class="profile-menu__title">
         {{ group.title }}
@@ -95,14 +102,13 @@ function handleMenuClick(item: MenuItem) {
           @click="handleMenuClick(item)"
         />
       </van-cell-group>
-    </section>
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
 .profile-page {
-  min-height: 100%;
-  padding: 16px 12px 24px;
+  padding: 16px 12px;
   background: #f7f8fa;
 }
 
@@ -126,6 +132,11 @@ function handleMenuClick(item: MenuItem) {
     background: #f2f3f5;
     color: var(--van-primary-color);
     font-size: 48px;
+
+    .van-image {
+      width: 100%;
+      height: 100%;
+    }
   }
 
   &__info {

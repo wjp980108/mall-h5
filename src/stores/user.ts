@@ -1,3 +1,4 @@
+import type { CurrentUser } from '@/api';
 import { useStorage } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { toRefs } from 'vue';
@@ -5,7 +6,7 @@ import { useReset } from '@/hooks/useReset';
 
 export const useUserStore = defineStore('user-store', () => {
   const [state, reset] = useReset(() => ({
-    userInfo: {},
+    userInfo: {} as CurrentUser,
   }));
 
   const accessToken = useStorage('access-token', '');

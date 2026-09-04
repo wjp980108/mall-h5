@@ -44,9 +44,9 @@ defineOptions({ name: 'Layout' });
     overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
 
-    .app-layout__page {
+    :deep(.app-layout__page) {
       min-height: 100%;
-      flex: 1;
+      flex: none;
     }
   }
 }

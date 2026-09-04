@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { FieldValidateError } from 'vant';
-import { showNotify, showToast } from 'vant';
+import { showToast } from 'vant';
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -18,14 +17,10 @@ function passwordValidator(value: string) {
 function verificationCodeValidator(value: string) {
   return /^[A-Z0-9]{6}$/i.test(value) || '请输入任意 6 位字母或数字验证码';
 }
-function handleFormFailed({ errors }: { errors: FieldValidateError[] }) {
-  showNotify({ type: 'warning', message: errors[0]?.message || '请完善重置信息' });
+function confirmPasswordValidator(value: string) {
+  return value === form.password || '两次输入的密码不一致';
 }
 async function handleResetPassword() {
-  if (form.password !== form.confirmPassword) {
-    showNotify({ type: 'warning', message: '两次输入的密码不一致' });
-    return;
-  }
   showToast('密码找回服务暂未开通');
 }
 </script>
@@ -36,12 +31,12 @@ async function handleResetPassword() {
       <section class="forgot-password-page__main" aria-label="找回密码">
         <h1>找回密码</h1>
         <p>验证手机号后重设登录密码</p>
-        <van-form class="auth-form" :show-error-message="false" @failed="handleFormFailed" @submit="handleResetPassword">
+        <van-form class="auth-form" @submit="handleResetPassword">
           <van-cell-group inset>
-            <van-field v-model.trim="form.phone" name="phone" type="tel" label="手机号" left-icon="phone-o" placeholder="请输入手机号" :rules="[{ required: true, validator: phoneValidator }]" />
-            <van-field v-model.trim="form.verificationCode" name="verificationCode" maxlength="6" label="验证码" left-icon="shield-o" placeholder="请输入任意 6 位字母或数字" :rules="[{ required: true, validator: verificationCodeValidator }]" />
-            <van-field v-model="form.password" name="password" type="password" label="新密码" left-icon="lock" placeholder="6-20 位密码" :rules="[{ required: true, validator: passwordValidator }]" />
-            <van-field v-model="form.confirmPassword" name="confirmPassword" type="password" label="确认密码" left-icon="lock" placeholder="请再次输入新密码" :rules="[{ required: true, message: '请再次输入新密码' }]" />
+            <van-field v-model.trim="form.phone" name="phone" type="tel" label="手机号" left-icon="phone-o" placeholder="请输入手机号" :rules="[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]" />
+            <van-field v-model.trim="form.verificationCode" name="verificationCode" maxlength="6" label="验证码" left-icon="shield-o" placeholder="请输入任意 6 位字母或数字" :rules="[{ required: true, message: '请输入验证码' }, { validator: verificationCodeValidator }]" />
+            <van-field v-model="form.password" name="password" type="password" label="新密码" left-icon="lock" placeholder="6-20 位密码" :rules="[{ required: true, message: '请输入新密码' }, { validator: passwordValidator }]" />
+            <van-field v-model="form.confirmPassword" name="confirmPassword" type="password" label="确认密码" left-icon="lock" placeholder="请再次输入新密码" :rules="[{ required: true, message: '请再次输入新密码' }, { validator: confirmPasswordValidator }]" />
           </van-cell-group>
           <van-button round block type="primary" native-type="submit">
             确认重置

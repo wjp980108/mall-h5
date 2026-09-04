@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { FieldValidateError } from 'vant';
 import type { RegisterReq } from '@/api';
-import { showNotify, showToast } from 'vant';
+import { showConfirmDialog, showToast } from 'vant';
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { register } from '@/api';
@@ -36,18 +35,23 @@ function emailValidator(value: string) {
   return !value || /^\S[^\s@]*@\S[^\s.]*\.\S+$/.test(value) || '请输入正确的邮箱地址';
 }
 
-function handleFormFailed({ errors }: { errors: FieldValidateError[] }) {
-  showNotify({ type: 'warning', message: errors[0]?.message || '请完善注册信息' });
+function confirmPasswordValidator(value: string) {
+  return value === form.password || '两次输入的密码不一致';
 }
 
 async function handleRegister() {
-  if (form.password !== form.confirmPassword) {
-    showNotify({ type: 'warning', message: '两次输入的密码不一致' });
-    return;
-  }
   if (!agreed.value) {
-    showNotify({ type: 'warning', message: '请先阅读并同意用户协议与隐私协议' });
-    return;
+    try {
+      await showConfirmDialog({
+        title: '同意协议',
+        message: '未勾选用户协议与隐私协议，是否默认同意并继续注册？',
+        confirmButtonText: '同意并注册',
+      });
+      agreed.value = true;
+    }
+    catch {
+      return;
+    }
   }
   const data: RegisterReq = {
     username: form.username,
@@ -69,10 +73,7 @@ async function handleRegister() {
       <section class="register-page__main" aria-label="注册账号">
         <h1>注册账号</h1>
         <p>设置账号与密码，完成后即可登录购物</p>
-        <van-form
-          class="auth-form" :show-error-message="false" @failed="handleFormFailed"
-          @submit="handleRegister"
-        >
+        <van-form class="auth-form" @submit="handleRegister">
           <van-cell-group inset>
             <van-field
               v-model.trim="form.username" name="username" label="用户名"
@@ -86,7 +87,7 @@ async function handleRegister() {
             <van-field
               v-model.trim="form.phone" name="phone" type="tel" label="手机号"
               left-icon="phone-o" placeholder="请输入手机号" autocomplete="tel" clearable
-              :rules="[{ required: true, validator: phoneValidator }]"
+              :rules="[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]"
             />
             <van-field
               v-model.trim="form.email" name="email" type="email" label="邮箱"
@@ -101,13 +102,13 @@ async function handleRegister() {
             <van-field
               v-model="form.password" name="password" type="password" label="密码"
               left-icon="lock" placeholder="6-20 位密码" autocomplete="new-password"
-              clearable :rules="[{ required: true, validator: passwordValidator }]"
+              clearable :rules="[{ required: true, message: '请输入密码' }, { validator: passwordValidator }]"
             />
             <van-field
               v-model="form.confirmPassword" name="confirmPassword" type="password"
               label="确认密码" left-icon="lock" placeholder="请再次输入密码"
               autocomplete="new-password" clearable
-              :rules="[{ required: true, message: '请再次输入密码' }]"
+              :rules="[{ required: true, message: '请再次输入密码' }, { validator: confirmPasswordValidator }]"
             />
           </van-cell-group>
           <van-button round block type="primary" native-type="submit">

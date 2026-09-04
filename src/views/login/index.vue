@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { FieldValidateError } from 'vant';
 import type { LoginReq } from '@/api';
-import { showNotify } from 'vant';
+import { showConfirmDialog } from 'vant';
 import { reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { login } from '@/api';
@@ -25,18 +24,30 @@ function passwordValidator(value: string) {
   return (value.length >= 6 && value.length <= 20) || '密码长度为 6-20 位';
 }
 
-function handleFormFailed({ errors }: { errors: FieldValidateError[] }) {
-  showNotify({ type: 'warning', message: errors[0]?.message || '请完善账号和密码' });
-}
-
 async function handleLogin() {
   if (!agreed.value) {
-    showNotify({ type: 'warning', message: '请先阅读并同意用户协议与隐私协议' });
-    return;
+    try {
+      await showConfirmDialog({
+        title: '同意协议',
+        message: '未勾选用户协议与隐私协议，是否默认同意并继续登录？',
+        confirmButtonText: '同意并登录',
+      });
+      agreed.value = true;
+    }
+    catch {
+      return;
+    }
   }
-  const { data } = await login(form);
-  userStore.accessToken = data.token;
-  await router.replace(import.meta.env.VITE_HOME_PATH);
+
+  submitting.value = true;
+  try {
+    const { data } = await login(form);
+    userStore.accessToken = data.token;
+    await router.replace(import.meta.env.VITE_HOME_PATH);
+  }
+  finally {
+    submitting.value = false;
+  }
 }
 </script>
 
@@ -51,10 +62,7 @@ async function handleLogin() {
       <section class="login-page__main" aria-label="欢迎登录">
         <h1>欢迎登录</h1>
         <p>登录后即可开始安心购物</p>
-        <van-form
-          class="auth-form" :show-error-message="false" @failed="handleFormFailed"
-          @submit="handleLogin"
-        >
+        <van-form class="auth-form" @submit="handleLogin">
           <van-cell-group inset>
             <van-field
               v-model.trim="form.account" name="account" label="账号" left-icon="user-o"
@@ -64,7 +72,7 @@ async function handleLogin() {
             <van-field
               v-model="form.password" name="password" type="password" label="密码"
               left-icon="lock" placeholder="请输入密码" autocomplete="current-password"
-              clearable :rules="[{ required: true, validator: passwordValidator }]"
+              clearable :rules="[{ required: true, message: '请输入密码' }, { validator: passwordValidator }]"
             />
           </van-cell-group>
           <div class="form-actions form-actions--between">

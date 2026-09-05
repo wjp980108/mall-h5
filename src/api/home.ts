@@ -49,6 +49,7 @@ export function fetchHomeNotices() {
   return request<HomeNotice[]>({
     url: '/api/app/notice/enabled',
     method: 'get',
+    params: { position: 'home' },
   });
 }
 

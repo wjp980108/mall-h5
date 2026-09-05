@@ -1,75 +1,95 @@
-export interface FlashSaleBanner {
-  id: string;
-  imageUrl: string;
-}
-
-export interface FlashSaleNotice {
-  id: string;
-  content: string;
-}
+import type { HomeBanner, HomeNotice } from '@/api/home.ts';
+import request from '@/utils/axios';
 
 export interface FlashSaleSession {
-  id: string;
-  name: string;
-  startTime: string;
-  endTime: string;
-  imageUrl: string;
+  id: number;
+  sessionName: string;
+  sessionStatus: boolean;
+  rushStartTime: string;
+  rushEndTime: string;
+  maxBuyCount: number;
+  bgImg: string | null;
 }
 
-export interface FlashSalePageData {
-  banners: FlashSaleBanner[];
-  notices: FlashSaleNotice[];
-  sessions: FlashSaleSession[];
+export interface FlashSaleGoods {
+  id: number;
+  goodsName: string;
+  goodsPrice: number;
+  sessionId: number;
+  sessionName: string | null;
+  coverImg: string | null;
+  detailImg: string | null;
+  goodsDetail: string | null;
+  goodsStatus: number;
+  goodsStatusName: string | null;
+  onlineStatus: boolean;
+  canPurchase: boolean;
 }
 
-const mockFlashSaleData: FlashSalePageData = {
-  banners: [
-    {
-      id: 'flash-sale-banner-1',
-      imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=85',
-    },
-    {
-      id: 'flash-sale-banner-2',
-      imageUrl: 'https://images.unsplash.com/photo-1607083206968-13611e3d76db?auto=format&fit=crop&w=1200&q=85',
-    },
-  ],
-  notices: [
-    { id: 'flash-sale-notice-1', content: '抢购商品数量有限，售完即止' },
-    { id: 'flash-sale-notice-2', content: '活动商品不支持与其他优惠叠加使用' },
-  ],
-  sessions: [
-    {
-      id: 'flash-sale-session-1',
-      name: '早间好物专场',
-      startTime: '09:00',
-      endTime: '11:00',
-      imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=85',
-    },
-    {
-      id: 'flash-sale-session-2',
-      name: '午间精选专场',
-      startTime: '12:00',
-      endTime: '14:00',
-      imageUrl: 'https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=900&q=85',
-    },
-    {
-      id: 'flash-sale-session-3',
-      name: '晚间爆款专场',
-      startTime: '20:00',
-      endTime: '22:00',
-      imageUrl: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=900&q=85',
-    },
-  ],
-};
+export interface FlashSaleGoodsPage {
+  list: FlashSaleGoods[];
+  total: number;
+}
 
-/**
- * 获取抢购页轮播、公告与活动场次数据。
- * 后端接口就绪后，保留函数签名并替换为 request 调用即可。
- */
-export function fetchFlashSalePage(): Promise<AppAxios.ResponseData<FlashSalePageData>> {
-  return Promise.resolve({
-    code: 200,
-    data: mockFlashSaleData,
-    msg: '获取抢购活动成功',
+export interface FetchFlashSaleGoodsParams {
+  sessionId?: number;
+  pageNum: number;
+  pageSize: number;
+}
+
+export interface PlaceFlashSaleOrderPayload {
+  goodsId: number;
+  addressId: number;
+}
+
+/** 获取抢购专区轮播图。 */
+export function fetchFlashSaleBanners() {
+  return request<HomeBanner[]>({
+    url: '/api/app/banner/enabled',
+    method: 'get',
+    params: { position: 'seckill' },
   });
+}
+
+/** 获取抢购专区展示的公告。 */
+export function fetchHomeNotices() {
+  return request<HomeNotice[]>({
+    url: '/api/app/notice/enabled',
+    method: 'get',
+    params: { position: 'seckill' },
+  });
+}
+
+/** 获取已启用的抢购场次。 */
+export function fetchFlashSaleSessions() {
+  return request<FlashSaleSession[]>({
+    url: '/api/app/session/enabled',
+    method: 'get',
+  });
+}
+
+/** 分页获取指定抢购场次的商品。 */
+export function fetchFlashSaleGoods(params: FetchFlashSaleGoodsParams) {
+  return request<FlashSaleGoodsPage>({
+    url: '/api/app/session/sale-goods',
+    method: 'get',
+    params,
+  });
+}
+
+/** 获取抢购商品详情。 */
+export function fetchFlashSaleGoodsDetail(id: number) {
+  return request<FlashSaleGoods | null>({
+    url: `/api/app/consign-goods/${id}`,
+    method: 'get',
+  });
+}
+
+/** 提交抢购订单。 */
+export function placeFlashSaleOrder(data: PlaceFlashSaleOrderPayload) {
+  return request<string>({
+    url: '/api/app/order/place',
+    method: 'post',
+    data,
+  }, { loading: true });
 }

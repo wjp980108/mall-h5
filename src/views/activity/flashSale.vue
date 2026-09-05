@@ -1,29 +1,32 @@
 <script setup lang="ts">
-import type { FlashSalePageData } from '@/api/flashSale.ts';
+import type { FlashSaleSession } from '@/api/flashSale.ts';
+import type { HomeBanner, HomeNotice } from '@/api/home.ts';
 import { onActivated, ref } from 'vue';
-import { fetchFlashSalePage } from '@/api/flashSale.ts';
+import { fetchFlashSaleBanners, fetchFlashSaleSessions, fetchHomeNotices } from '@/api/flashSale.ts';
 
 defineOptions({ name: 'FlashSalePage' });
 
-const pageData = ref<FlashSalePageData>({
-  banners: [],
-  notices: [],
-  sessions: [],
-});
+const banners = ref<HomeBanner[]>([]);
+const notices = ref<HomeNotice[]>([]);
+const sessions = ref<FlashSaleSession[]>([]);
 const refreshing = ref(false);
 const loading = ref(false);
 const loadError = ref(false);
 
 async function loadFlashSalePage() {
+  if (loading.value)
+    return;
+
   loading.value = true;
   loadError.value = false;
 
   try {
-    const { data } = await fetchFlashSalePage();
-    pageData.value = data;
-  }
-  catch {
-    loadError.value = true;
+    const [, , sessionResult] = await Promise.allSettled([
+      fetchFlashSaleBanners().then(({ data }) => { banners.value = data; }),
+      fetchHomeNotices().then(({ data }) => { notices.value = data; }),
+      fetchFlashSaleSessions().then(({ data }) => { sessions.value = data; }),
+    ]);
+    loadError.value = sessionResult.status === 'rejected';
   }
   finally {
     loading.value = false;
@@ -44,21 +47,21 @@ onActivated(loadFlashSalePage);
 
 <template>
   <div class="flash-sale-page">
-    <van-pull-refresh v-model="refreshing" @refresh="handleRefresh">
+    <van-pull-refresh v-model="refreshing" :disabled="loading" @refresh="handleRefresh">
       <div class="flash-sale-page__content">
         <van-swipe
-          v-if="pageData.banners.length"
+          v-if="banners.length"
           class="banner-swipe"
           :autoplay="3500"
           indicator-color="#fff"
         >
-          <van-swipe-item v-for="banner in pageData.banners" :key="banner.id">
-            <van-image :src="banner.imageUrl" fit="cover" width="100%" height="100%" />
+          <van-swipe-item v-for="banner in banners" :key="banner.id">
+            <van-image :src="banner.imgUrl" fit="cover" width="100%" height="100%" />
           </van-swipe-item>
         </van-swipe>
 
         <van-notice-bar
-          v-if="pageData.notices.length"
+          v-if="notices.length"
           class="flash-sale-notice"
           background="#fff4f0"
           color="#e85032"
@@ -66,8 +69,10 @@ onActivated(loadFlashSalePage);
           :scrollable="false"
         >
           <van-swipe vertical class="notice-swipe" :autoplay="3000" :show-indicators="false">
-            <van-swipe-item v-for="notice in pageData.notices" :key="notice.id">
-              {{ notice.content }}
+            <van-swipe-item v-for="notice in notices" :key="notice.id">
+              <router-link class="notice-item" :to="{ name: 'NoticeDetail', params: { id: notice.id } }">
+                {{ notice.title }}
+              </router-link>
             </van-swipe-item>
           </van-swipe>
         </van-notice-bar>
@@ -78,7 +83,7 @@ onActivated(loadFlashSalePage);
             <span>限时开抢，先到先得</span>
           </div>
 
-          <van-loading v-if="loading && !pageData.sessions.length" class="page-loading" />
+          <van-loading v-if="loading && !sessions.length" class="page-loading" />
 
           <van-empty v-else-if="loadError" image="error" description="加载失败">
             <van-button round type="danger" size="small" @click="loadFlashSalePage">
@@ -86,17 +91,20 @@ onActivated(loadFlashSalePage);
             </van-button>
           </van-empty>
 
-          <div v-else-if="pageData.sessions.length" class="session-list">
-            <article v-for="session in pageData.sessions" :key="session.id" class="session-card">
-              <van-image class="session-card__image" :src="session.imageUrl" fit="cover" />
+          <div v-else-if="sessions.length" class="session-list">
+            <router-link
+              v-for="session in sessions" :key="session.id" class="session-card"
+              :to="{ name: 'FlashSaleGoods', params: { sessionId: session.id } }"
+            >
+              <van-image v-if="session.bgImg" class="session-card__image" :src="session.bgImg" fit="cover" />
               <div class="session-card__mask" />
               <div class="session-card__content">
                 <span class="session-card__eyebrow">FLASH SALE</span>
-                <h2>{{ session.name }}</h2>
-                <p>{{ session.startTime }} - {{ session.endTime }}</p>
+                <h2>{{ session.sessionName }}</h2>
+                <p>{{ session.rushStartTime }} - {{ session.rushEndTime }}</p>
               </div>
               <van-icon class="session-card__arrow" name="arrow" color="#fff" size="20" />
-            </article>
+            </router-link>
           </div>
 
           <van-empty v-else description="暂未开放抢购场次" />
@@ -108,6 +116,10 @@ onActivated(loadFlashSalePage);
 
 <style scoped lang="scss">
 .flash-sale-page {
+  .van-pull-refresh {
+    flex: 1;
+  }
+
   &__content {
     padding: 12px;
   }
@@ -126,6 +138,19 @@ onActivated(loadFlashSalePage);
   .flash-sale-notice {
     margin-top: 12px;
     border-radius: 8px;
+
+    :deep(.van-notice-bar__content) {
+      width: 100%;
+    }
+
+    .notice-item {
+      display: block;
+      overflow: hidden;
+      color: inherit;
+      text-decoration: none;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     .notice-swipe {
       height: 40px;

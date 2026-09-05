@@ -14,7 +14,7 @@ export default [
   {
     path: '/flash-sale',
     name: 'FlashSale',
-    component: () => import('@/views/flash-sale/index.vue'),
+    component: () => import('@/views/activity/flashSale.vue'),
     meta: {
       title: '抢购',
       icon: 'fire-o',

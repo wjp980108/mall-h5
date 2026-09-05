@@ -10,7 +10,7 @@ export default [
       hideInMenu: true,
       hideInTag: true,
     },
-    component: () => import('@/views/login/index.vue'),
+    component: () => import('@/views/auth/login.vue'),
   },
   {
     path: '/register',
@@ -19,7 +19,7 @@ export default [
       title: '注册',
       requiresAuth: false,
     },
-    component: () => import('@/views/auth/register/index.vue'),
+    component: () => import('@/views/auth/register.vue'),
   },
   {
     path: '/forgot-password',
@@ -28,7 +28,7 @@ export default [
       title: '找回密码',
       requiresAuth: false,
     },
-    component: () => import('@/views/auth/forgot-password/index.vue'),
+    component: () => import('@/views/auth/forgotPassword.vue'),
   },
   {
     path: '/user-agreement',
@@ -37,7 +37,7 @@ export default [
       title: '用户协议',
       requiresAuth: false,
     },
-    component: () => import('@/views/auth/user-agreement/index.vue'),
+    component: () => import('@/views/legal/userAgreement.vue'),
   },
   {
     path: '/privacy-policy',
@@ -46,7 +46,7 @@ export default [
       title: '隐私协议',
       requiresAuth: false,
     },
-    component: () => import('@/views/auth/privacy-policy/index.vue'),
+    component: () => import('@/views/legal/privacyPolicy.vue'),
   },
   // {
   //   // 全屏 404：无匹配路由时的兜底目标，不套后台布局、不进菜单

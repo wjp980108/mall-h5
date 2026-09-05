@@ -37,6 +37,7 @@ function handleSubmit() {
           <van-checkbox v-model="item.checked" class="cart-item__checkbox" />
           <van-image
             class="cart-item__image" fit="cover" :src="item.imageUrl"
+            lazy-load
             :alt="item.name"
           />
           <div class="cart-item__content">

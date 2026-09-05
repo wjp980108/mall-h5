@@ -1,4 +1,4 @@
-import Vant from 'vant';
+import Vant, { Lazyload } from 'vant';
 import { createApp } from 'vue';
 import initVersionRocket from '@/config/versionRocket';
 import { installRouter } from '@/router';
@@ -17,6 +17,7 @@ async function setupApp() {
   await installRouter(app);
 
   app.use(Vant);
+  app.use(Lazyload);
 
   app.mount('#app');
 }

@@ -127,6 +127,7 @@ onMounted(loadPromotions);
               >
                 <van-image
                   class="product-card__image"
+                  lazy-load
                   :src="product.goodsThumb"
                   fit="cover"
                   width="100%"

@@ -96,7 +96,13 @@ onActivated(loadFlashSalePage);
               v-for="session in sessions" :key="session.id" class="session-card"
               :to="{ name: 'FlashSaleGoods', params: { sessionId: session.id } }"
             >
-              <van-image v-if="session.bgImg" class="session-card__image" :src="session.bgImg" fit="cover" />
+              <van-image
+                v-if="session.bgImg"
+                lazy-load
+                class="session-card__image"
+                :src="session.bgImg"
+                fit="cover"
+              />
               <div class="session-card__mask" />
               <div class="session-card__content">
                 <span class="session-card__eyebrow">FLASH SALE</span>

@@ -111,7 +111,13 @@ onMounted(() => loadOrders(true));
               </header>
 
               <div v-for="item in order.items" :key="item.id" class="buyer-order-card__item">
-                <van-image class="buyer-order-card__image" :src="item.imageUrl" :alt="item.name" fit="cover" />
+                <van-image
+                  class="buyer-order-card__image"
+                  lazy-load
+                  :src="item.imageUrl"
+                  :alt="item.name"
+                  fit="cover"
+                />
                 <div class="buyer-order-card__product">
                   <h2>{{ item.name }}</h2>
                   <p v-if="item.specification">

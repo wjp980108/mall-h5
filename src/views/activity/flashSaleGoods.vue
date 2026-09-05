@@ -139,6 +139,7 @@ onUnmounted(() => {
           >
             <van-image
               class="goods-card__image"
+              lazy-load
               :src="item.coverImg || undefined"
               fit="cover"
             >

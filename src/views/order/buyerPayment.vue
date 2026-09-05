@@ -86,7 +86,7 @@ onMounted(loadOrder);
             <strong>待付款</strong>
           </div>
           <div v-for="item in order.items" :key="item.id" class="payment-order-card__item">
-            <van-image :src="item.imageUrl" :alt="item.name" fit="cover" />
+            <van-image lazy-load :src="item.imageUrl" :alt="item.name" fit="cover" />
             <div>
               <h2>{{ item.name }}</h2>
               <p v-if="item.specification">

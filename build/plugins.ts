@@ -5,7 +5,6 @@ import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import UnoCSS from 'unocss/vite';
 import compressPlugin from 'vite-plugin-compression';
-import vueDevTools from 'vite-plugin-vue-devtools';
 
 type Algorithm = 'gzip' | 'brotliCompress' | 'deflate' | 'deflateRaw';
 interface Config {
@@ -83,6 +82,6 @@ export default function createVitePlugins(env: any) {
     UnoCSS(),
     configCompressPlugin(env.VITE_COMPRESSION),
     versionFilePlugin(),
-    vueDevTools(),
+    // vueDevTools(),
   ];
 }

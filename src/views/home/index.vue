@@ -127,7 +127,7 @@ onMounted(loadPromotions);
               >
                 <van-image
                   class="product-card__image"
-                  :src="product.coverImg"
+                  :src="product.goodsThumb"
                   fit="cover"
                   width="100%"
                 />
@@ -135,8 +135,8 @@ onMounted(loadPromotions);
                   <h2 class="product-card__name">
                     {{ product.goodsName }}
                   </h2>
-                  <span class="product-card__price">¥{{ moneyThousand(product.goodsPrice) }}</span>
-                  <span class="product-card__sales">已售 {{ product.saleTimes }}</span>
+                  <span class="product-card__price">¥{{ moneyThousand(product.price) }}</span>
+                  <span class="product-card__sales">已售 {{ product.sales }}</span>
                 </div>
               </div>
             </div>

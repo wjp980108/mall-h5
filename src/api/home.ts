@@ -20,9 +20,9 @@ export interface NoticeDetail extends HomeNotice {
 export interface HomeProduct {
   id: number;
   goodsName: string;
-  goodsPrice: number;
-  coverImg: string;
-  saleTimes: number;
+  price: number;
+  goodsThumb: string;
+  sales: number;
 }
 
 export interface HomeProductPage {

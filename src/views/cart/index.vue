@@ -79,8 +79,6 @@ function handleSubmit() {
 
 <style scoped lang="scss">
 .cart-page {
-  min-height: 100%;
-
   &__content {
     padding: 12px 12px calc(110px + var(--van-tabbar-height) + env(safe-area-inset-bottom));
   }

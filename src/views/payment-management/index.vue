@@ -450,9 +450,6 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .payment-management-page {
-  min-height: 100%;
-  background: #f7f8fa;
-
   &__intro {
     display: flex;
     align-items: flex-start;

@@ -99,9 +99,6 @@ onMounted(loadAddresses);
 
 <style scoped lang="scss">
 .address-list-page {
-  min-height: 100%;
-  background: #f7f8fa;
-
   &__skeleton {
     padding: 16px;
   }

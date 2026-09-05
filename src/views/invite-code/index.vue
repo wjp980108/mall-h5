@@ -76,9 +76,7 @@ async function copyInviteCode() {
 
 <style scoped lang="scss">
 .invite-code-page {
-  min-height: 100%;
   padding: 20px 16px 32px;
-  background: #f7f8fa;
 
   &__notice {
     margin: 16px 4px 0;

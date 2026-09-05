@@ -131,11 +131,6 @@ onMounted(loadOrder);
 
 <style scoped lang="scss">
 .buyer-payment-page {
-  display: flex;
-  min-height: 100%;
-  flex-direction: column;
-  background: #f7f8fa;
-
   &__skeleton {
     margin: 16px;
   }

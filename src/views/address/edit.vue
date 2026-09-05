@@ -144,9 +144,6 @@ onMounted(loadAddress);
 
 <style scoped lang="scss">
 .address-edit-page {
-  min-height: 100%;
-  background: #f7f8fa;
-
   &__skeleton {
     padding: 16px;
   }

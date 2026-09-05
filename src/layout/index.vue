@@ -45,8 +45,10 @@ defineOptions({ name: 'Layout' });
     -webkit-overflow-scrolling: touch;
 
     :deep(.app-layout__page) {
+      display: flex;
       min-height: 100%;
       flex: none;
+      flex-direction: column;
     }
   }
 }

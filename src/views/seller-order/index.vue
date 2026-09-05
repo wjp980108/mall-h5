@@ -171,9 +171,6 @@ onMounted(() => loadOrders(true));
 
 <style scoped lang="scss">
 .seller-orders-page {
-  min-height: 100%;
-  background: #f7f8fa;
-
   &__content {
     padding: 12px;
   }

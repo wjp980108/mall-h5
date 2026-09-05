@@ -108,9 +108,6 @@ onActivated(loadFlashSalePage);
 
 <style scoped lang="scss">
 .flash-sale-page {
-  min-height: 100%;
-  background: #f7f8fa;
-
   &__content {
     padding: 12px;
   }

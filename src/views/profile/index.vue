@@ -109,7 +109,6 @@ function handleMenuClick(item: MenuItem) {
 <style scoped lang="scss">
 .profile-page {
   padding: 16px 12px;
-  background: #f7f8fa;
 }
 
 .profile-card {

@@ -154,9 +154,6 @@ onMounted(loadPromotions);
 
 <style scoped lang="scss">
 .home-page {
-  display: flex;
-  flex-direction: column;
-
   &__search {
     position: sticky;
     z-index: 1;

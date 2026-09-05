@@ -126,9 +126,6 @@ async function handleBuyNow() {
 
 <style scoped lang="scss">
 .product-detail {
-  min-height: 100%;
-  background: #f7f8fa;
-
   &__skeleton {
     margin: 16px;
   }

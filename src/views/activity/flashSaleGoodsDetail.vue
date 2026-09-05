@@ -19,13 +19,15 @@ const refreshing = ref(false);
 const loadError = ref(false);
 const addresses = ref<UserAddress[]>([]);
 const addressId = ref<number>();
-const addressLoading = ref(false);
 const addressError = ref(false);
-const showAddresses = ref(false);
 const submitting = ref(false);
 const orderNo = ref('');
 const selectedAddress = computed(() => addresses.value.find(item => item.id === addressId.value));
 const canBuy = computed(() => goods.value?.canPurchase && goods.value.onlineStatus && goods.value.goodsStatus === 1 && !orderNo.value);
+const addressIdFromQuery = computed(() => {
+  const id = Number(route.query.addressId);
+  return Number.isSafeInteger(id) && id > 0 ? id : undefined;
+});
 
 async function loadGoods(showLoading = true) {
   if (!Number.isSafeInteger(goodsId) || goodsId < 1) {
@@ -59,29 +61,32 @@ async function handleRefresh() {
 }
 
 async function loadAddresses() {
-  if (addressLoading.value)
-    return;
-  addressLoading.value = true;
   addressError.value = false;
   try {
     const { data } = await fetchAddressList();
     addresses.value = data;
-    if (!data.some(item => item.id === addressId.value))
+    if (addressIdFromQuery.value && data.some(item => item.id === addressIdFromQuery.value))
+      addressId.value = addressIdFromQuery.value;
+    else if (!data.some(item => item.id === addressId.value))
       addressId.value = data.find(item => item.isDefault)?.id ?? data[0]?.id;
   }
   catch {
     addressError.value = true;
   }
-  finally {
-    addressLoading.value = false;
-  }
 }
 
-async function openAddresses() {
+function openAddresses() {
   if (submitting.value)
     return;
-  showAddresses.value = true;
-  await loadAddresses();
+
+  router.push({
+    name: 'AddressList',
+    query: {
+      select: '1',
+      returnTo: route.fullPath,
+      addressId: addressId.value?.toString(),
+    },
+  });
 }
 
 async function handleBuy() {
@@ -90,7 +95,7 @@ async function handleBuy() {
   const address = selectedAddress.value;
   if (!address || addressError.value) {
     showToast('请先选择收货地址');
-    await openAddresses();
+    openAddresses();
     return;
   }
 
@@ -110,7 +115,6 @@ async function handleBuy() {
   try {
     const { data } = await placeFlashSaleOrder({ goodsId, addressId: address.id });
     orderNo.value = data;
-    showAddresses.value = false;
   }
   catch {
     // 请求层展示后端的时段、限购或商品状态错误，刷新详情避免继续展示过期状态。
@@ -176,36 +180,6 @@ onMounted(() => {
         </van-button>
       </footer>
     </template>
-
-    <van-popup v-model:show="showAddresses" round position="bottom" closeable class="address-popup" :close-on-click-overlay="!submitting">
-      <h2>选择收货地址</h2>
-      <van-loading v-if="addressLoading" class="address-loading" />
-      <van-empty v-else-if="addressError" image="error" description="地址加载失败">
-        <van-button size="small" @click="loadAddresses">
-          重新加载
-        </van-button>
-      </van-empty>
-      <van-empty v-else-if="!addresses.length" description="请先添加收货地址" />
-      <van-radio-group v-else v-model="addressId" :disabled="submitting">
-        <van-cell
-          v-for="address in addresses" :key="address.id"
-          :title="`${address.receiverName} ${address.receiverPhone}`" :label="address.address"
-          clickable @click="addressId = address.id"
-        >
-          <template #right-icon>
-            <van-radio :name="address.id" />
-          </template>
-        </van-cell>
-      </van-radio-group>
-      <div class="address-actions">
-        <van-button round plain block type="primary" @click="router.push({ name: 'AddressCreate' })">
-          新增地址
-        </van-button>
-        <van-button v-if="addresses.length && !addressError" round block type="danger" @click="showAddresses = false">
-          使用此地址
-        </van-button>
-      </div>
-    </van-popup>
   </section>
 </template>
 
@@ -273,24 +247,6 @@ onMounted(() => {
     margin: 0 auto;
     border-top: 1px solid #ebedf0;
     background: #fff;
-  }
-
-  .address-popup {
-    max-height: 75vh;
-    padding: 20px 0 calc(16px + env(safe-area-inset-bottom));
-    h2 {
-      padding: 0 16px;
-    }
-  }
-
-  .address-loading {
-    padding: 24px;
-    text-align: center;
-  }
-  .address-actions {
-    display: grid;
-    gap: 12px;
-    padding: 16px;
   }
 }
 </style>

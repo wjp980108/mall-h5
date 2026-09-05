@@ -80,7 +80,7 @@ async function saveAddress(info: AddressEditInfo) {
       showSuccessToast('地址已新增');
     }
 
-    router.replace({ name: 'AddressList' });
+    router.back();
   }
   finally {
     saving.value = false;

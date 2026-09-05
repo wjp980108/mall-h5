@@ -1,22 +1,33 @@
 <script setup lang="ts">
 import type { AddressListAddress } from 'vant';
 import type { UserAddress } from '@/api/address';
-import { showSuccessToast } from 'vant';
-import { computed, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { fetchAddressList, setDefaultAddress } from '@/api/address';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { fetchAddressList } from '@/api/address';
+import { useNavTitle } from '@/hooks/useNavTitle.ts';
 
 defineOptions({ name: 'AddressListPage' });
 
+const route = useRoute();
 const router = useRouter();
+const { setNavTitle } = useNavTitle();
 const addresses = ref<UserAddress[]>([]);
 const loading = ref(true);
 const loadError = ref(false);
-const settingDefault = ref(false);
 
-const selectedAddressId = computed(() =>
-  addresses.value.find(address => address.isDefault)?.id,
-);
+const isSelecting = computed(() => route.query.select === '1');
+const returnTo = computed(() => {
+  const path = route.query.returnTo;
+  return typeof path === 'string' && path.startsWith('/') ? path : null;
+});
+
+const selectedAddressId = computed(() => {
+  const id = Number(route.query.addressId);
+  if (isSelecting.value && Number.isSafeInteger(id) && id > 0)
+    return id;
+
+  return addresses.value.find(address => address.isDefault)?.id;
+});
 
 const addressList = computed<AddressListAddress[]>(() =>
   addresses.value.map(address => ({
@@ -45,38 +56,51 @@ async function loadAddresses() {
 }
 
 function addAddress() {
-  router.push({ name: 'AddressCreate' });
+  router.push({
+    name: 'AddressCreate',
+    query: isSelecting.value ? route.query : undefined,
+  });
 }
 
 function editAddress(address: AddressListAddress) {
-  router.push({ name: 'AddressEdit', params: { id: address.id } });
+  router.push({
+    name: 'AddressEdit',
+    params: { id: address.id },
+    query: isSelecting.value ? route.query : undefined,
+  });
 }
 
-async function selectAddress(address: AddressListAddress) {
-  if (settingDefault.value || address.id === selectedAddressId.value)
+function selectAddress(address: AddressListAddress) {
+  if (!isSelecting.value || !returnTo.value)
     return;
 
-  settingDefault.value = true;
-
-  try {
-    await setDefaultAddress(Number(address.id));
-    addresses.value = addresses.value.map(item => ({
-      ...item,
-      isDefault: item.id === Number(address.id),
-    }));
-    showSuccessToast('已设为默认地址');
-  }
-  finally {
-    settingDefault.value = false;
-  }
+  const target = router.resolve(returnTo.value);
+  router.replace({
+    path: target.path,
+    query: {
+      ...target.query,
+      addressId: String(address.id),
+    },
+  });
 }
 
-onMounted(loadAddresses);
+onMounted(() => {
+  if (isSelecting.value)
+    setNavTitle('选择收货地址');
+
+  loadAddresses();
+});
+
+onUnmounted(() => {
+  setNavTitle();
+});
 </script>
 
 <template>
   <section class="address-list-page">
-    <van-skeleton v-if="loading" title :row="8" class="address-list-page__skeleton" />
+    <van-loading v-if="loading" vertical class="address-list-page__loading">
+      加载中...
+    </van-loading>
 
     <van-empty v-else-if="loadError" image="error" description="地址加载失败">
       <van-button round type="primary" size="small" @click="loadAddresses">
@@ -88,19 +112,24 @@ onMounted(loadAddresses);
       v-else
       :model-value="selectedAddressId"
       :list="addressList"
+      :switchable="isSelecting"
       add-button-text="新增地址"
       default-tag-text="默认"
       @add="addAddress"
       @edit="editAddress"
       @select="selectAddress"
-    />
+    >
+      <template v-if="!addresses.length" #top>
+        <van-empty image="default" :description="isSelecting ? '暂无收货地址，请先新增' : '暂无收货地址'" />
+      </template>
+    </van-address-list>
   </section>
 </template>
 
 <style scoped lang="scss">
 .address-list-page {
-  &__skeleton {
-    padding: 16px;
+  &__loading {
+    margin-top: 64px;
   }
 
   :deep(.van-address-list) {

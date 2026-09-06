@@ -13,7 +13,6 @@ const loading = ref(true);
 const refreshing = ref(false);
 const loadError = ref(false);
 const productId = computed(() => Number(route.params.id));
-const productImage = computed(() => product.value?.goodsThumb ?? '');
 
 async function loadProductDetail(showLoading = true) {
   if (!Number.isSafeInteger(productId.value) || productId.value < 1) {
@@ -66,12 +65,7 @@ async function handleRefresh() {
     <template v-else>
       <van-pull-refresh v-model="refreshing" class="product-detail__refresh" @refresh="handleRefresh">
         <div class="product-detail__content">
-          <van-image
-            v-if="productImage"
-            class="product-detail__gallery"
-            :src="productImage"
-            fit="cover"
-          />
+          <van-image class="product-detail__gallery" :src="product.goodsThumb" fit="cover" />
 
           <section class="product-detail__info">
             <div class="product-detail__price">

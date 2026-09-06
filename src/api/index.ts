@@ -29,6 +29,11 @@ export interface ChangePasswordPayload {
   password: string;
 }
 
+export interface ForgotPasswordPayload {
+  phone: string;
+  password: string;
+}
+
 export interface RegisterReq {
   username: string;
   password: string;
@@ -88,6 +93,18 @@ export function changePassword(data: ChangePasswordPayload) {
   }, {
     loading: '修改中...',
     successMessage: '密码已修改，请重新登录',
+  });
+}
+
+// 找回密码
+export function forgotPassword(data: ForgotPasswordPayload) {
+  return request({
+    url: '/api/app/user/forgot-password',
+    method: 'put',
+    data,
+  }, {
+    loading: '重置中...',
+    successMessage: '密码已重置，请重新登录',
   });
 }
 

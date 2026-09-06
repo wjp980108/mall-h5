@@ -1,24 +1,29 @@
 <script setup lang="ts">
 import type { ProductDetail } from '@/api/product.ts';
-import type { AddCartItem } from '@/stores/cart';
-import { showSuccessToast, showToast } from 'vant';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { fetchProductDetail, submitProductOrder } from '@/api/product.ts';
-import { useCartStore } from '@/stores/cart';
+import { fetchProductDetail } from '@/api/product.ts';
+import { moneyThousand } from '@/utils/money.ts';
 
 defineOptions({ name: 'ProductDetailPage' });
 
 const route = useRoute();
-const cartStore = useCartStore();
 const product = ref<ProductDetail | null>(null);
 const loading = ref(true);
+const refreshing = ref(false);
 const loadError = ref(false);
-const submitting = ref(false);
-const productId = computed(() => String(route.params.id ?? ''));
+const productId = computed(() => Number(route.params.id));
+const productImage = computed(() => product.value?.goodsThumb ?? '');
 
-async function loadProductDetail() {
-  loading.value = true;
+async function loadProductDetail(showLoading = true) {
+  if (!Number.isSafeInteger(productId.value) || productId.value < 1) {
+    loadError.value = true;
+    loading.value = false;
+    return;
+  }
+
+  if (showLoading)
+    loading.value = true;
   loadError.value = false;
 
   try {
@@ -29,44 +34,19 @@ async function loadProductDetail() {
     loadError.value = true;
   }
   finally {
-    loading.value = false;
+    if (showLoading)
+      loading.value = false;
   }
 }
 
 onMounted(loadProductDetail);
 
-function toCartItem(product: ProductDetail): AddCartItem {
-  return {
-    id: product.id,
-    name: product.name,
-    imageUrl: product.images[0] ?? '',
-    price: Number(product.price.replaceAll(',', '')),
-  };
-}
-
-function handleAddToCart() {
-  if (!product.value)
-    return;
-
-  cartStore.addItem(toCartItem(product.value));
-  showToast('已加入购物车');
-}
-
-async function handleBuyNow() {
-  if (!product.value || submitting.value)
-    return;
-
-  submitting.value = true;
-
+async function handleRefresh() {
   try {
-    const { data } = await submitProductOrder({
-      productId: product.value.id,
-      quantity: 1,
-    });
-    showSuccessToast(`下单成功：${data.orderId}`);
+    await loadProductDetail(false);
   }
   finally {
-    submitting.value = false;
+    refreshing.value = false;
   }
 }
 </script>
@@ -84,55 +64,56 @@ async function handleBuyNow() {
     <van-empty v-else-if="!product" description="商品不存在" />
 
     <template v-else>
-      <van-swipe v-if="product.images.length > 1" class="product-detail__gallery" :autoplay="3500">
-        <van-swipe-item v-for="image in product.images" :key="image">
-          <van-image :src="image" fit="cover" width="100%" height="100%" />
-        </van-swipe-item>
-      </van-swipe>
-      <van-image
-        v-else
-        class="product-detail__gallery"
-        :src="product.images[0]"
-        fit="cover"
-        width="100%"
-        height="100%"
-      />
+      <van-pull-refresh v-model="refreshing" class="product-detail__refresh" @refresh="handleRefresh">
+        <div class="product-detail__content">
+          <van-image
+            v-if="productImage"
+            class="product-detail__gallery"
+            :src="productImage"
+            fit="cover"
+          />
 
-      <section class="product-detail__info">
-        <div class="product-detail__price">
-          ¥{{ product.price }}
+          <section class="product-detail__info">
+            <div class="product-detail__price">
+              ¥{{ moneyThousand(product.price) }}
+            </div>
+            <h1>{{ product.goodsName }}</h1>
+            <p>已售 {{ product.sales }}</p>
+          </section>
+
+          <section class="product-detail__description">
+            <h2>商品详情</h2>
+            <van-cell-group inset>
+              <van-cell v-if="product.categoryName" title="商品分类" :value="product.categoryName" />
+              <van-cell v-if="product.goodsSn" title="商品货号" :value="product.goodsSn" />
+              <van-cell title="库存" :value="String(product.stock)" />
+            </van-cell-group>
+          </section>
         </div>
-        <h1>{{ product.name }}</h1>
-        <p>{{ product.summary }}</p>
-        <span>已售 {{ product.salesCount }}</span>
-      </section>
-
-      <section class="product-detail__description">
-        <h2>商品详情</h2>
-        <article v-html="product.detailHtml" />
-      </section>
-
-      <footer class="product-detail__actions">
-        <van-button round plain type="primary" @click="handleAddToCart">
-          加入购物车
-        </van-button>
-        <van-button round type="danger" :loading="submitting" @click="handleBuyNow">
-          立即购买
-        </van-button>
-      </footer>
+      </van-pull-refresh>
     </template>
   </section>
 </template>
 
 <style scoped lang="scss">
 .product-detail {
+  &__refresh,
+  &__content {
+    min-height: 100%;
+  }
+
+  &__refresh {
+    flex: 1;
+  }
+
   &__skeleton {
     margin: 16px;
   }
 
   &__gallery {
     display: block;
-    height: min(100vw, 480px);
+    width: 100%;
+    height: min(60vw, 280px);
     background: #f2f3f5;
 
     :deep(.van-image__img) {
@@ -183,7 +164,7 @@ async function handleBuyNow() {
   }
 
   &__description {
-    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
 
     > h2 {
       margin: 0 0 16px;
@@ -192,67 +173,9 @@ async function handleBuyNow() {
       line-height: 24px;
     }
 
-    :deep(article) {
-      color: #323233;
-      font-size: 14px;
-      line-height: 1.7;
-
-      h2,
-      h3,
-      p {
-        margin: 0;
-      }
-
-      h2 {
-        font-size: 18px;
-        line-height: 26px;
-      }
-
-      h3 {
-        margin-top: 20px;
-        font-size: 16px;
-        line-height: 24px;
-      }
-
-      p,
-      ul {
-        margin-top: 12px;
-      }
-
-      ul {
-        margin-bottom: 0;
-        padding-left: 20px;
-      }
-
-      img {
-        display: block;
-        width: 100%;
-        height: auto;
-        margin-top: 16px;
-      }
+    :deep(.van-cell-group--inset) {
+      margin: 0;
     }
-  }
-
-  &__actions {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-    border-top: 1px solid #ebedf0;
-    background: #fff;
-  }
-}
-
-@media (min-width: 480px) {
-  .product-detail__actions {
-    right: auto;
-    left: 50%;
-    width: var(--mall-content-width);
-    transform: translateX(-50%);
   }
 }
 </style>

@@ -90,67 +90,54 @@ onMounted(() => loadOrders(true));
 </script>
 
 <template>
-  <section class="buyer-orders-page">
+  <div class="buyer-orders-page">
     <van-tabs v-model:active="activeTab" class="buyer-orders-page__tabs" @change="handleTabChange">
       <van-tab v-for="tab in tabs" :key="tab.name" :name="tab.name" :title="tab.title" />
     </van-tabs>
 
-    <div class="buyer-orders-page__content">
-      <van-pull-refresh v-model="refreshing" class="buyer-orders-page__refresh" @refresh="refreshOrders">
-        <van-empty v-if="!orders.length && !loading" image="search" description="暂无相关订单" />
+    <van-pull-refresh v-model="refreshing" class="buyer-orders-page__refresh" @refresh="refreshOrders">
+      <van-empty v-if="!orders.length && !loading" image="search" description="暂无相关订单" />
 
-        <van-list v-else v-model:loading="loading" :finished="finished" finished-text="没有更多订单了" @load="loadOrders">
-          <div class="buyer-order-list">
-            <article v-for="order in orders" :key="order.id" class="buyer-order-card">
-              <header class="buyer-order-card__header">
-                <span>订单号：{{ order.orderNo }}</span>
-                <strong :class="`is-${order.orderStatus}`">{{ order.orderStatusName || statusLabel(order.orderStatus) }}</strong>
-              </header>
+      <van-list v-else v-model:loading="loading" :finished="finished" finished-text="没有更多订单了" @load="loadOrders">
+        <div class="buyer-order-list">
+          <article v-for="order in orders" :key="order.id" class="buyer-order-card">
+            <header class="buyer-order-card__header">
+              <span>订单号：{{ order.orderNo }}</span>
+              <strong :class="`is-${order.orderStatus}`">{{ order.orderStatusName || statusLabel(order.orderStatus) }}</strong>
+            </header>
 
-              <div class="buyer-order-card__item">
-                <div class="buyer-order-card__image" aria-hidden="true">
-                  <van-icon name="goods-collect-o" />
-                </div>
-                <div class="buyer-order-card__product">
-                  <h2>{{ order.goodsName }}</h2>
-                  <p>卖家：{{ order.sellerName }} {{ order.sellerPhone }}</p>
-                  <div>
-                    <span>¥{{ moneyThousand(order.rushPrice) }}</span>
-                  </div>
+            <div class="buyer-order-card__item">
+              <div class="buyer-order-card__image" aria-hidden="true">
+                <van-icon name="goods-collect-o" />
+              </div>
+              <div class="buyer-order-card__product">
+                <h2>{{ order.goodsName }}</h2>
+                <p>卖家：{{ order.sellerName }} {{ order.sellerPhone }}</p>
+                <div>
+                  <span>¥{{ moneyThousand(order.rushPrice) }}</span>
                 </div>
               </div>
+            </div>
 
-              <footer class="buyer-order-card__footer">
-                <span>下单时间：{{ order.createTime }}</span>
-                <span v-if="order.orderStatus === 1 && order.payDeadline">付款截止：{{ order.payDeadline }}</span>
-                <p>实付款 <strong>¥{{ moneyThousand(order.rushPrice) }}</strong></p>
-                <van-button v-if="order.orderStatus === 1" plain round size="small" type="primary" class="buyer-order-card__pay-button" @click="payOrder(order)">
-                  去付款
-                </van-button>
-              </footer>
-            </article>
-          </div>
-        </van-list>
-      </van-pull-refresh>
-    </div>
-  </section>
+            <footer class="buyer-order-card__footer">
+              <span>下单时间：{{ order.createTime }}</span>
+              <span v-if="order.orderStatus === 1 && order.payDeadline">付款截止：{{ order.payDeadline }}</span>
+              <van-button v-if="order.orderStatus === 1" plain round size="small" type="primary" class="buyer-order-card__pay-button" @click="payOrder(order)">
+                去付款
+              </van-button>
+            </footer>
+          </article>
+        </div>
+      </van-list>
+    </van-pull-refresh>
+  </div>
 </template>
 
 <style scoped lang="scss">
 .buyer-orders-page {
-  height: 100%;
-  min-height: 0;
-
-  &__content {
-    display: flex;
-    min-height: 0;
+  &__refresh {
     flex: 1;
     padding: 12px;
-  }
-
-  &__refresh {
-    width: 100%;
-    height: 100%;
   }
 
   &__tabs {
@@ -206,10 +193,6 @@ onMounted(() => loadOrders(true));
     .is-3,
     .is-4 {
       color: var(--van-primary-color);
-    }
-
-    .is-5 {
-      color: #969799;
     }
   }
 
@@ -267,22 +250,13 @@ onMounted(() => loadOrders(true));
     }
 
     > div {
-      display: flex;
-      justify-content: space-between;
       margin-top: auto;
-      color: #323233;
+      color: #ee0a24;
       font-size: 14px;
-
-      small {
-        color: #969799;
-        font-size: 12px;
-      }
     }
   }
 
   &__footer {
-    position: relative;
-    min-height: 70px;
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 5px 12px;
@@ -290,15 +264,6 @@ onMounted(() => loadOrders(true));
 
     > span {
       width: 100%;
-    }
-
-    p {
-      margin: 0;
-
-      strong {
-        color: #ee0a24;
-        font-size: 15px;
-      }
     }
   }
 

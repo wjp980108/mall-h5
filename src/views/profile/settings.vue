@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { UploaderFileListItem } from 'vant';
-import { showConfirmDialog, showSuccessToast, showToast } from 'vant';
+import { showToast } from 'vant';
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { changePassword, updateUserInfo, uploadImage } from '@/api';
@@ -92,18 +92,6 @@ async function savePassword() {
     passwordSaving.value = false;
   }
 }
-
-async function logout() {
-  try {
-    await showConfirmDialog({ title: '退出登录', message: '退出后需要重新登录，确定要退出吗？' });
-  }
-  catch {
-    return;
-  }
-  userStore.handleLogout();
-  await router.replace('/login');
-  showSuccessToast('已退出登录');
-}
 </script>
 
 <template>
@@ -137,12 +125,6 @@ async function logout() {
       <van-cell title="修改密码" is-link @click="openPasswordEditor" />
     </van-cell-group>
 
-    <div class="logout-action">
-      <van-button type="danger" size="small" @click="logout">
-        退出登录
-      </van-button>
-    </div>
-
     <van-popup v-model:show="passwordEditorVisible" position="bottom" round closeable :style="{ maxHeight: '88%' }">
       <section class="settings-sheet">
         <header class="settings-sheet__header">
@@ -172,12 +154,6 @@ async function logout() {
   &--primary {
     margin-bottom: 28px;
   }
-}
-
-.logout-action {
-  display: flex;
-  justify-content: center;
-  margin-top: 34px;
 }
 
 .settings-sheet {

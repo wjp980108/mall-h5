@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { showConfirmDialog, showSuccessToast } from 'vant';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
@@ -65,6 +66,19 @@ function handleMenuClick(item: MenuItem) {
   if (item.routeName)
     router.push({ name: item.routeName });
 }
+
+async function logout() {
+  try {
+    await showConfirmDialog({ title: '退出登录', message: '退出后需要重新登录，确定要退出吗？' });
+  }
+  catch {
+    return;
+  }
+
+  userStore.handleLogout();
+  await router.replace('/login');
+  showSuccessToast('已退出登录');
+}
 </script>
 
 <template>
@@ -102,6 +116,12 @@ function handleMenuClick(item: MenuItem) {
           @click="handleMenuClick(item)"
         />
       </van-cell-group>
+    </div>
+
+    <div class="logout-action">
+      <van-button plain round block type="danger" @click="logout">
+        退出登录
+      </van-button>
     </div>
   </div>
 </template>
@@ -209,6 +229,15 @@ function handleMenuClick(item: MenuItem) {
       color: #323233;
       font-size: 15px;
     }
+  }
+}
+
+.logout-action {
+  margin: 28px 12px calc(16px + env(safe-area-inset-bottom));
+
+  :deep(.van-button) {
+    height: 44px;
+    font-size: 15px;
   }
 }
 </style>

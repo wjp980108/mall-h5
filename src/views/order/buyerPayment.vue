@@ -4,6 +4,7 @@ import type { BuyerOrder } from '@/api/buyerOrder';
 import { showSuccessToast, showToast } from 'vant';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { uploadImage } from '@/api';
 import { confirmBuyerOrderPayment, fetchBuyerOrder } from '@/api/buyerOrder';
 import { moneyThousand } from '@/utils/money';
 
@@ -29,16 +30,29 @@ async function loadOrder() {
   }
 }
 
-function afterRead(file: UploaderFileListItem | UploaderFileListItem[]) {
+async function afterRead(file: UploaderFileListItem | UploaderFileListItem[]) {
   const uploadedFile = Array.isArray(file) ? file[0] : file;
-  const url = typeof uploadedFile?.content === 'string' ? uploadedFile.content : uploadedFile?.url;
 
-  if (!url) {
+  if (!uploadedFile?.file) {
     showToast('图片读取失败，请重新上传');
     return;
   }
 
-  paymentProofUrl.value = url;
+  uploadedFile.status = 'uploading';
+  uploadedFile.message = '上传中...';
+
+  try {
+    const formData = new FormData();
+    formData.append('file', uploadedFile.file);
+    const { data } = await uploadImage(formData);
+    paymentProofUrl.value = data;
+    uploadedFile.status = 'done';
+  }
+  catch {
+    uploadedFile.status = 'failed';
+    uploadedFile.message = '上传失败';
+    showToast('支付凭证上传失败，请重试');
+  }
 }
 
 function deletePaymentProof() {
@@ -57,9 +71,12 @@ async function confirmPayment() {
   submitting.value = true;
 
   try {
-    await confirmBuyerOrderPayment(order.value.id, { paymentProofUrl: paymentProofUrl.value });
+    await confirmBuyerOrderPayment(order.value.id, {
+      payVoucherUrl: paymentProofUrl.value,
+      payVoucherPlatform: 'local-1',
+    });
     showSuccessToast('付款成功');
-    router.replace({ name: 'BuyerOrders', query: { status: 'paid' } });
+    router.replace({ name: 'BuyerOrders', query: { status: '2' } });
   }
   catch (error) {
     showToast(error instanceof Error ? error.message : '付款失败，请稍后重试');
@@ -78,26 +95,31 @@ onMounted(loadOrder);
 
     <van-empty v-else-if="!order" image="error" description="订单不存在" />
 
-    <template v-else-if="order.status === 'pending-payment'">
+    <template v-else-if="order.orderStatus === 1">
       <div class="buyer-payment-page__content">
         <section class="payment-order-card">
           <div class="payment-order-card__header">
-            <span>订单号：{{ order.id }}</span>
-            <strong>待付款</strong>
+            <span>订单号：{{ order.orderNo }}</span>
+            <strong>{{ order.orderStatusName || '待付款' }}</strong>
           </div>
-          <div v-for="item in order.items" :key="item.id" class="payment-order-card__item">
-            <van-image lazy-load :src="item.imageUrl" :alt="item.name" fit="cover" />
-            <div>
-              <h2>{{ item.name }}</h2>
-              <p v-if="item.specification">
-                {{ item.specification }}
-              </p>
-              <span>¥{{ moneyThousand(item.price) }} × {{ item.quantity }}</span>
+          <div class="payment-order-card__item">
+            <div class="payment-order-card__icon" aria-hidden="true">
+              <van-icon name="bag-o" />
             </div>
+            <div class="payment-order-card__details">
+              <h2>{{ order.goodsName }}</h2>
+              <p><van-icon name="user-o" /> 卖家：{{ order.sellerName }} {{ order.sellerPhone }}</p>
+            </div>
+            <strong class="payment-order-card__price">¥{{ moneyThousand(order.rushPrice) }}</strong>
           </div>
-          <p class="payment-order-card__total">
-            应付金额 <strong>¥{{ moneyThousand(order.totalAmount) }}</strong>
-          </p>
+          <section class="payment-order-card__address">
+            <span><van-icon name="location-o" /> 收货地址</span>
+            <p>{{ order.receiveAddress }}</p>
+          </section>
+          <footer class="payment-order-card__total">
+            <span>订单应付</span>
+            <strong>¥{{ moneyThousand(order.rushPrice) }}</strong>
+          </footer>
         </section>
 
         <section class="payment-proof-card">
@@ -118,7 +140,7 @@ onMounted(loadOrder);
       </div>
 
       <footer class="buyer-payment-page__footer">
-        <span>应付：<strong>¥{{ moneyThousand(order.totalAmount) }}</strong></span>
+        <span>应付：<strong>¥{{ moneyThousand(order.rushPrice) }}</strong></span>
         <van-button round type="primary" :loading="submitting" @click="confirmPayment">
           确认付款
         </van-button>
@@ -190,24 +212,27 @@ onMounted(loadOrder);
 
   &__item {
     display: flex;
+    align-items: center;
     gap: 10px;
-    padding: 12px;
+    padding: 16px;
+  }
 
-    .van-image {
-      width: 76px;
-      height: 76px;
-      flex: none;
-      overflow: hidden;
-      border-radius: 8px;
-      background: #f2f3f5;
-    }
+  &__icon {
+    display: flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: var(--van-primary-color);
+    font-size: 25px;
+  }
 
-    > div {
-      display: flex;
-      min-width: 0;
-      flex: 1;
-      flex-direction: column;
-    }
+  &__details {
+    min-width: 0;
+    flex: 1;
 
     h2,
     p {
@@ -216,33 +241,62 @@ onMounted(loadOrder);
 
     h2 {
       color: #323233;
-      font-size: 14px;
-      line-height: 20px;
+      font-size: 15px;
+      line-height: 22px;
     }
 
     p {
       margin-top: 5px;
       color: #969799;
       font-size: 12px;
-    }
 
-    span {
-      margin-top: auto;
-      color: #323233;
-      font-size: 13px;
+      .van-icon {
+        margin-right: 2px;
+      }
     }
   }
 
+  &__price {
+    flex: none;
+    color: #323233;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
   &__total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin: 0;
-    padding: 12px;
+    padding: 16px;
     border-top: 1px solid #f2f3f5;
     color: #646566;
-    text-align: right;
+    font-size: 14px;
 
     strong {
       color: #ee0a24;
       font-size: 18px;
+    }
+  }
+
+  &__address {
+    padding: 12px 16px;
+    border-top: 1px solid #f7f8fa;
+    background: #fafcff;
+    color: #646566;
+    font-size: 12px;
+    line-height: 18px;
+
+    > span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #969799;
+    }
+
+    p {
+      margin: 4px 0 0;
+      color: #323233;
     }
   }
 }

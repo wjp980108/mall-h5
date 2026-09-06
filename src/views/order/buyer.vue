@@ -7,7 +7,7 @@ import { moneyThousand } from '@/utils/money';
 
 defineOptions({ name: 'BuyerOrdersPage' });
 
-type OrderTab = 'all' | BuyerOrderStatus;
+type OrderTab = 0 | 1 | 2 | 5;
 
 const route = useRoute();
 const router = useRouter();
@@ -15,32 +15,33 @@ const activeTab = ref<OrderTab>(getInitialTab());
 const loading = ref(false);
 const refreshing = ref(false);
 const finished = ref(false);
-const initialLoading = ref(true);
-const page = ref(1);
+const pageNum = ref(1);
 const pageSize = 10;
 const orders = ref<BuyerOrder[]>([]);
 
 const tabs: Array<{ name: OrderTab; title: string }> = [
-  { name: 'all', title: '全部订单' },
-  { name: 'pending-payment', title: '待付款' },
-  { name: 'paid', title: '已付款' },
-  { name: 'cancelled', title: '已取消' },
+  { name: 0, title: '全部' },
+  { name: 1, title: '待付款' },
+  { name: 2, title: '已付款' },
+  { name: 5, title: '已取消' },
 ];
 
 function getInitialTab(): OrderTab {
-  const status = route.query.status;
+  const status = Number(route.query.status);
 
-  if (status === 'pending-payment' || status === 'paid' || status === 'cancelled')
-    return status;
+  if ([1, 2, 5].includes(status))
+    return status as OrderTab;
 
-  return 'all';
+  return 0;
 }
 
 function statusLabel(status: BuyerOrderStatus) {
   return {
-    'pending-payment': '待付款',
-    'paid': '已付款',
-    'cancelled': '已取消',
+    1: '待付款',
+    2: '已付款',
+    3: '已确认',
+    4: '已代售',
+    5: '已取消',
   }[status];
 }
 
@@ -48,22 +49,21 @@ async function loadOrders(reset = false) {
   if (loading.value || (finished.value && !reset))
     return;
 
-  const currentPage = reset ? 1 : page.value;
+  const currentPage = reset ? 1 : pageNum.value;
   loading.value = true;
 
   try {
     const { data } = await fetchBuyerOrders({
-      page: currentPage,
+      pageNum: currentPage,
       pageSize,
-      status: activeTab.value === 'all' ? undefined : activeTab.value,
+      orderStatus: activeTab.value || undefined,
     });
     orders.value = currentPage === 1 ? data.list : [...orders.value, ...data.list];
-    page.value = currentPage + 1;
+    pageNum.value = currentPage + 1;
     finished.value = orders.value.length >= data.total;
   }
   finally {
     loading.value = false;
-    initialLoading.value = false;
   }
 }
 
@@ -79,7 +79,6 @@ async function refreshOrders() {
 }
 
 function handleTabChange() {
-  initialLoading.value = true;
   void refreshOrders();
 }
 
@@ -97,44 +96,36 @@ onMounted(() => loadOrders(true));
     </van-tabs>
 
     <div class="buyer-orders-page__content">
-      <van-pull-refresh v-model="refreshing" @refresh="refreshOrders">
-        <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多订单了" @load="loadOrders">
-          <van-skeleton v-if="initialLoading" title :row="12" />
+      <van-pull-refresh v-model="refreshing" class="buyer-orders-page__refresh" @refresh="refreshOrders">
+        <van-empty v-if="!orders.length && !loading" image="search" description="暂无相关订单" />
 
-          <van-empty v-else-if="!orders.length" image="search" description="暂无相关订单" />
-
-          <div v-else class="buyer-order-list">
+        <van-list v-else v-model:loading="loading" :finished="finished" finished-text="没有更多订单了" @load="loadOrders">
+          <div class="buyer-order-list">
             <article v-for="order in orders" :key="order.id" class="buyer-order-card">
               <header class="buyer-order-card__header">
-                <span>订单号：{{ order.id }}</span>
-                <strong :class="`is-${order.status}`">{{ statusLabel(order.status) }}</strong>
+                <span>订单号：{{ order.orderNo }}</span>
+                <strong :class="`is-${order.orderStatus}`">{{ order.orderStatusName || statusLabel(order.orderStatus) }}</strong>
               </header>
 
-              <div v-for="item in order.items" :key="item.id" class="buyer-order-card__item">
-                <van-image
-                  class="buyer-order-card__image"
-                  lazy-load
-                  :src="item.imageUrl"
-                  :alt="item.name"
-                  fit="cover"
-                />
+              <div class="buyer-order-card__item">
+                <div class="buyer-order-card__image" aria-hidden="true">
+                  <van-icon name="goods-collect-o" />
+                </div>
                 <div class="buyer-order-card__product">
-                  <h2>{{ item.name }}</h2>
-                  <p v-if="item.specification">
-                    {{ item.specification }}
-                  </p>
+                  <h2>{{ order.goodsName }}</h2>
+                  <p>卖家：{{ order.sellerName }} {{ order.sellerPhone }}</p>
                   <div>
-                    <span>¥{{ moneyThousand(item.price) }}</span>
-                    <small>×{{ item.quantity }}</small>
+                    <span>¥{{ moneyThousand(order.rushPrice) }}</span>
                   </div>
                 </div>
               </div>
 
               <footer class="buyer-order-card__footer">
-                <span>下单时间：{{ order.createdAt }}</span>
-                <p>共 {{ order.items.reduce((total, item) => total + item.quantity, 0) }} 件，实付款 <strong>¥{{ moneyThousand(order.totalAmount) }}</strong></p>
-                <van-button v-if="order.status === 'pending-payment'" round size="small" type="primary" @click="payOrder(order)">
-                  付款
+                <span>下单时间：{{ order.createTime }}</span>
+                <span v-if="order.orderStatus === 1 && order.payDeadline">付款截止：{{ order.payDeadline }}</span>
+                <p>实付款 <strong>¥{{ moneyThousand(order.rushPrice) }}</strong></p>
+                <van-button v-if="order.orderStatus === 1" plain round size="small" type="primary" class="buyer-order-card__pay-button" @click="payOrder(order)">
+                  去付款
                 </van-button>
               </footer>
             </article>
@@ -147,8 +138,19 @@ onMounted(() => loadOrders(true));
 
 <style scoped lang="scss">
 .buyer-orders-page {
+  height: 100%;
+  min-height: 0;
+
   &__content {
+    display: flex;
+    min-height: 0;
+    flex: 1;
     padding: 12px;
+  }
+
+  &__refresh {
+    width: 100%;
+    height: 100%;
   }
 
   &__tabs {
@@ -160,6 +162,10 @@ onMounted(() => loadOrders(true));
 
   :deep(.van-tabs__wrap) {
     background: #fff;
+  }
+
+  :deep(.van-pull-refresh__track) {
+    min-height: 100%;
   }
 }
 
@@ -192,15 +198,17 @@ onMounted(() => loadOrders(true));
       font-weight: 500;
     }
 
-    .is-pending-payment {
+    .is-1 {
       color: #ee0a24;
     }
 
-    .is-paid {
+    .is-2,
+    .is-3,
+    .is-4 {
       color: var(--van-primary-color);
     }
 
-    .is-cancelled {
+    .is-5 {
       color: #969799;
     }
   }
@@ -212,12 +220,17 @@ onMounted(() => loadOrders(true));
   }
 
   &__image {
+    display: flex;
     width: 78px;
     height: 78px;
     flex: none;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
     border-radius: 8px;
     background: #f2f3f5;
+    color: var(--van-primary-color);
+    font-size: 34px;
   }
 
   &__product {
@@ -287,6 +300,13 @@ onMounted(() => loadOrders(true));
         font-size: 15px;
       }
     }
+  }
+
+  &__pay-button {
+    min-width: 76px;
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    font-size: 13px;
   }
 }
 </style>

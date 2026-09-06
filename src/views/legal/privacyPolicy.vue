@@ -7,13 +7,13 @@ const router = useRouter();
 </script>
 
 <template>
-  <main class="privacy-policy-page">
-    <section class="privacy-policy-page__content">
+  <div class="privacy-policy-page">
+    <div class="privacy-policy-page__content">
       <h1>隐私协议</h1>
       <p class="privacy-policy-page__description">
         我们重视并保护你的个人信息
       </p>
-      <article class="agreement-content">
+      <div class="agreement-content">
         <h2>一、信息收集</h2>
         <p>我们仅收集提供商品、订单、支付和客户服务所必需的信息，包括账号、联系方式和订单相关信息。</p>
         <h2>二、信息使用</h2>
@@ -22,12 +22,12 @@ const router = useRouter();
         <p>我们采取合理的技术和管理措施保护你的个人信息，并在必要范围内控制信息访问权限。</p>
         <h2>四、你的权利</h2>
         <p>你可通过平台提供的渠道查询、更正或删除个人信息。最终协议内容以平台正式发布版本为准。</p>
-      </article>
+      </div>
       <button class="back-button" type="button" @click="router.back()">
         返回上一页
       </button>
-    </section>
-  </main>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">

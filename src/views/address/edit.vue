@@ -117,7 +117,7 @@ onMounted(loadAddress);
 </script>
 
 <template>
-  <section class="address-edit-page">
+  <div class="address-edit-page">
     <van-skeleton v-if="loading" title :row="8" class="address-edit-page__skeleton" />
 
     <van-empty v-else-if="loadError" image="error" description="地址加载失败">
@@ -139,7 +139,7 @@ onMounted(loadAddress);
       @save="saveAddress"
       @delete="removeAddress"
     />
-  </section>
+  </div>
 </template>
 
 <style scoped lang="scss">

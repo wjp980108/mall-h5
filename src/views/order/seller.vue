@@ -111,7 +111,7 @@ onMounted(() => loadOrders(true));
 </script>
 
 <template>
-  <section class="seller-orders-page">
+  <div class="seller-orders-page">
     <van-tabs v-model:active="activeTab" class="seller-orders-page__tabs" @change="handleTabChange">
       <van-tab v-for="tab in tabs" :key="tab.name" :name="tab.name" :title="tab.title" />
     </van-tabs>
@@ -124,11 +124,11 @@ onMounted(() => loadOrders(true));
           <van-empty v-else-if="!orders.length" image="search" description="暂无相关订单" />
 
           <div v-else class="seller-order-list">
-            <article v-for="order in orders" :key="order.id" class="seller-order-card">
-              <header class="seller-order-card__header">
+            <div v-for="order in orders" :key="order.id" class="seller-order-card">
+              <div class="seller-order-card__header">
                 <span>订单号：{{ order.id }}</span>
                 <strong :class="`is-${order.status}`">{{ statusLabel(order.status) }}</strong>
-              </header>
+              </div>
 
               <div v-for="item in order.items" :key="item.id" class="seller-order-card__item">
                 <van-image
@@ -150,7 +150,7 @@ onMounted(() => loadOrders(true));
                 </div>
               </div>
 
-              <footer class="seller-order-card__footer">
+              <div class="seller-order-card__footer">
                 <span>入库时间：{{ order.createdAt }}</span>
                 <span v-if="order.soldAt">售出时间：{{ order.soldAt }}</span>
                 <span v-else-if="order.listedAt">委托上架：{{ order.listedAt }}</span>
@@ -166,13 +166,13 @@ onMounted(() => loadOrders(true));
                 >
                   {{ order.listedAt ? '已委托上架' : '委托上架' }}
                 </van-button>
-              </footer>
-            </article>
+              </div>
+            </div>
           </div>
         </van-list>
       </van-pull-refresh>
     </div>
-  </section>
+  </div>
 </template>
 
 <style scoped lang="scss">

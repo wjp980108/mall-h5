@@ -30,10 +30,10 @@ function handleSubmit() {
 </script>
 
 <template>
-  <section class="cart-page">
+  <div class="cart-page">
     <div class="cart-page__content">
       <div v-if="cartStore.items.length" class="cart-list">
-        <article v-for="item in cartStore.items" :key="item.id" class="cart-item">
+        <div v-for="item in cartStore.items" :key="item.id" class="cart-item">
           <van-checkbox v-model="item.checked" class="cart-item__checkbox" />
           <van-image
             class="cart-item__image" fit="cover" :src="item.imageUrl"
@@ -52,7 +52,7 @@ function handleSubmit() {
               <van-stepper v-model="item.quantity" :min="1" integer />
             </div>
           </div>
-        </article>
+        </div>
       </div>
 
       <van-empty v-else description="购物车还是空的" />
@@ -75,7 +75,7 @@ function handleSubmit() {
         全选
       </van-checkbox>
     </van-submit-bar>
-  </section>
+  </div>
 </template>
 
 <style scoped lang="scss">

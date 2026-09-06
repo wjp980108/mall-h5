@@ -123,7 +123,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="flash-sale-goods">
+  <div class="flash-sale-goods">
     <van-empty v-if="!validSessionId" description="场次不存在" />
     <van-pull-refresh v-else v-model="refreshing" :disabled="loading" @refresh="handleRefresh">
       <van-list
@@ -168,7 +168,7 @@ onUnmounted(() => {
         description="暂无可抢购商品，请稍后刷新"
       />
     </van-pull-refresh>
-  </section>
+  </div>
 </template>
 
 <style scoped lang="scss">

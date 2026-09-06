@@ -38,7 +38,7 @@ onMounted(loadNoticeDetail);
 </script>
 
 <template>
-  <main class="notice-detail-page">
+  <div class="notice-detail-page">
     <van-skeleton v-if="loading" title :row="10" class="notice-detail-page__skeleton" />
 
     <van-empty v-else-if="loadError" image="error" description="公告加载失败">
@@ -49,18 +49,18 @@ onMounted(loadNoticeDetail);
 
     <van-empty v-else-if="!notice" description="公告不存在" />
 
-    <article v-else class="notice-detail-page__content">
-      <header class="notice-detail-page__header">
+    <div v-else class="notice-detail-page__content">
+      <div class="notice-detail-page__header">
         <h1>{{ notice.title }}</h1>
         <p class="notice-detail-page__meta">
           <span><van-icon name="clock-o" />{{ notice.createTime }}</span>
           <span><van-icon name="eye-o" />{{ notice.readCount }} 阅读</span>
         </p>
-      </header>
+      </div>
       <div class="notice-detail-page__divider" />
-      <section class="notice-detail-page__body" v-html="notice.content" />
-    </article>
-  </main>
+      <div class="notice-detail-page__body" v-html="notice.content" />
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">

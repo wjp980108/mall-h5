@@ -90,14 +90,14 @@ onMounted(loadOrder);
 </script>
 
 <template>
-  <section class="buyer-payment-page">
+  <div class="buyer-payment-page">
     <van-skeleton v-if="loading" title :row="10" class="buyer-payment-page__skeleton" />
 
     <van-empty v-else-if="!order" image="error" description="订单不存在" />
 
     <template v-else-if="order.orderStatus === 1">
       <div class="buyer-payment-page__content">
-        <section class="payment-order-card">
+        <div class="payment-order-card">
           <div class="payment-order-card__header">
             <span>订单号：{{ order.orderNo }}</span>
             <strong>{{ order.orderStatusName || '待付款' }}</strong>
@@ -112,17 +112,17 @@ onMounted(loadOrder);
             </div>
             <strong class="payment-order-card__price">¥{{ moneyThousand(order.rushPrice) }}</strong>
           </div>
-          <section class="payment-order-card__address">
+          <div class="payment-order-card__address">
             <span><van-icon name="location-o" /> 收货地址</span>
             <p>{{ order.receiveAddress }}</p>
-          </section>
-          <footer class="payment-order-card__total">
+          </div>
+          <div class="payment-order-card__total">
             <span>订单应付</span>
             <strong>¥{{ moneyThousand(order.rushPrice) }}</strong>
-          </footer>
-        </section>
+          </div>
+        </div>
 
-        <section class="payment-proof-card">
+        <div class="payment-proof-card">
           <h2>上传支付凭证</h2>
           <p>请上传清晰的支付截图，确认付款后订单将更新为已付款。</p>
           <van-uploader
@@ -136,19 +136,19 @@ onMounted(loadOrder);
               <span>上传支付凭证</span>
             </div>
           </van-uploader>
-        </section>
+        </div>
       </div>
 
-      <footer class="buyer-payment-page__footer">
+      <div class="buyer-payment-page__footer">
         <span>应付：<strong>¥{{ moneyThousand(order.rushPrice) }}</strong></span>
         <van-button round type="primary" :loading="submitting" @click="confirmPayment">
           确认付款
         </van-button>
-      </footer>
+      </div>
     </template>
 
     <van-empty v-else description="该订单当前无需付款" />
-  </section>
+  </div>
 </template>
 
 <style scoped lang="scss">

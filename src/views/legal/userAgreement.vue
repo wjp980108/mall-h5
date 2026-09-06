@@ -7,13 +7,13 @@ const router = useRouter();
 </script>
 
 <template>
-  <main class="agreement-page">
-    <section class="agreement-page__content">
+  <div class="agreement-page">
+    <div class="agreement-page__content">
       <h1>用户协议</h1>
       <p class="agreement-page__description">
         请仔细阅读并理解本协议内容
       </p>
-      <article class="agreement-content">
+      <div class="agreement-content">
         <h2>一、服务说明</h2>
         <p>感谢使用本平台。平台将依照本协议及相关规则为你提供商品浏览、订单交易和客户服务等功能。</p>
         <h2>二、账号使用</h2>
@@ -22,12 +22,12 @@ const router = useRouter();
         <p>你不得利用平台从事违法违规活动，不得干扰平台正常运行或侵害其他用户的合法权益。</p>
         <h2>四、协议更新</h2>
         <p>平台可在法律法规允许的范围内更新本协议。最终协议内容以平台正式发布版本为准。</p>
-      </article>
+      </div>
       <button class="back-button" type="button" @click="router.back()">
         返回上一页
       </button>
-    </section>
-  </main>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">

@@ -280,7 +280,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="payment-management-page">
+  <div class="payment-management-page">
     <div class="payment-management-page__intro">
       <van-icon name="shield-o" />
       <span>请确认收款信息准确无误，保存前需完成手机验证。</span>
@@ -293,7 +293,7 @@ onMounted(async () => {
 
           <template v-else>
             <div v-if="bankCards.length" class="bank-card-list">
-              <article v-for="bankCard in bankCards" :key="bankCard.id" class="bank-card-item">
+              <div v-for="bankCard in bankCards" :key="bankCard.id" class="bank-card-item">
                 <div class="bank-card-item__header">
                   <div class="bank-card-item__bank-icon">
                     <van-icon name="gold-coin-o" />
@@ -314,7 +314,7 @@ onMounted(async () => {
                     删除
                   </button>
                 </div>
-              </article>
+              </div>
             </div>
 
             <van-empty v-else image="search" description="暂无银行卡">
@@ -425,7 +425,7 @@ onMounted(async () => {
     </van-tabs>
 
     <van-popup v-model:show="bankFormVisible" position="bottom" round closeable :style="{ maxHeight: '88%' }">
-      <section class="bank-card-form">
+      <div class="bank-card-form">
         <h2>{{ editingBankCardId ? '编辑银行卡' : '添加银行卡' }}</h2>
         <van-cell-group inset>
           <van-field v-model="bankForm.accountName" label="持卡人" placeholder="请输入持卡人姓名" />
@@ -443,9 +443,9 @@ onMounted(async () => {
         <van-button round block type="primary" :loading="bankSaving" @click="saveBankCard">
           保存银行卡
         </van-button>
-      </section>
+      </div>
     </van-popup>
-  </section>
+  </div>
 </template>
 
 <style scoped lang="scss">

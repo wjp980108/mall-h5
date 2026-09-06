@@ -52,14 +52,14 @@ async function handleLogin() {
 </script>
 
 <template>
-  <main class="login-page">
-    <section class="login-page__content">
-      <header class="login-brand" aria-label="系统信息">
+  <div class="login-page">
+    <div class="login-page__content">
+      <div class="login-brand" aria-label="系统信息">
         <img class="login-brand__logo" :src="logo" alt="系统 logo">
         <span class="login-brand__name">{{ appName }}</span>
-      </header>
+      </div>
 
-      <section class="login-page__main" aria-label="欢迎登录">
+      <div class="login-page__main" aria-label="欢迎登录">
         <h1>欢迎登录</h1>
         <p>登录后即可开始安心购物</p>
         <van-form class="auth-form" @submit="handleLogin">
@@ -87,7 +87,7 @@ async function handleLogin() {
             登录
           </van-button>
         </van-form>
-        <footer class="auth-agreement">
+        <div class="auth-agreement">
           <van-checkbox v-model="agreed" checked-color="var(--van-primary-color)" icon-size="16px">
             我已阅读并同意
           </van-checkbox>
@@ -98,10 +98,10 @@ async function handleLogin() {
           <button type="button" @click="router.push('/privacy-policy')">
             《隐私协议》
           </button>
-        </footer>
-      </section>
-    </section>
-  </main>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">

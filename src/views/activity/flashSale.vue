@@ -77,7 +77,7 @@ onActivated(loadFlashSalePage);
           </van-swipe>
         </van-notice-bar>
 
-        <section class="session-section">
+        <div class="session-section">
           <div class="session-section__header">
             <h1>抢购场次</h1>
             <span>限时开抢，先到先得</span>
@@ -114,7 +114,7 @@ onActivated(loadFlashSalePage);
           </div>
 
           <van-empty v-else description="暂未开放抢购场次" />
-        </section>
+        </div>
       </div>
     </van-pull-refresh>
   </div>

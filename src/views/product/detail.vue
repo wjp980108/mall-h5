@@ -51,7 +51,7 @@ async function handleRefresh() {
 </script>
 
 <template>
-  <section class="product-detail">
+  <div class="product-detail">
     <van-skeleton v-if="loading" title :row="12" class="product-detail__skeleton" />
 
     <van-empty v-else-if="loadError" image="error" description="商品加载失败">
@@ -67,26 +67,26 @@ async function handleRefresh() {
         <div class="product-detail__content">
           <van-image class="product-detail__gallery" :src="product.goodsThumb" fit="cover" />
 
-          <section class="product-detail__info">
+          <div class="product-detail__info">
             <div class="product-detail__price">
               ¥{{ moneyThousand(product.price) }}
             </div>
             <h1>{{ product.goodsName }}</h1>
             <p>已售 {{ product.sales }}</p>
-          </section>
+          </div>
 
-          <section class="product-detail__description">
+          <div class="product-detail__description">
             <h2>商品详情</h2>
             <van-cell-group inset>
               <van-cell v-if="product.categoryName" title="商品分类" :value="product.categoryName" />
               <van-cell v-if="product.goodsSn" title="商品货号" :value="product.goodsSn" />
               <van-cell title="库存" :value="String(product.stock)" />
             </van-cell-group>
-          </section>
+          </div>
         </div>
       </van-pull-refresh>
     </template>
-  </section>
+  </div>
 </template>
 
 <style scoped lang="scss">

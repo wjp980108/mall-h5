@@ -68,9 +68,9 @@ async function handleRegister() {
 </script>
 
 <template>
-  <main class="register-page">
-    <section class="register-page__content">
-      <section class="register-page__main" aria-label="注册账号">
+  <div class="register-page">
+    <div class="register-page__content">
+      <div class="register-page__main" aria-label="注册账号">
         <h1>注册账号</h1>
         <p>设置账号与密码，完成后即可登录购物</p>
         <van-form class="auth-form" @submit="handleRegister">
@@ -120,7 +120,7 @@ async function handleRegister() {
             </button>
           </div>
         </van-form>
-        <footer class="auth-agreement">
+        <div class="auth-agreement">
           <van-checkbox v-model="agreed" checked-color="var(--van-primary-color)" icon-size="16px">
             我已阅读并同意
           </van-checkbox>
@@ -131,10 +131,10 @@ async function handleRegister() {
           <button type="button" @click="router.push('/privacy-policy')">
             《隐私协议》
           </button>
-        </footer>
-      </section>
-    </section>
-  </main>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">

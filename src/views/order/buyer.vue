@@ -100,11 +100,11 @@ onMounted(() => loadOrders(true));
 
       <van-list v-else v-model:loading="loading" :finished="finished" finished-text="没有更多订单了" @load="loadOrders">
         <div class="buyer-order-list">
-          <article v-for="order in orders" :key="order.id" class="buyer-order-card">
-            <header class="buyer-order-card__header">
+          <div v-for="order in orders" :key="order.id" class="buyer-order-card">
+            <div class="buyer-order-card__header">
               <span>订单号：{{ order.orderNo }}</span>
               <strong :class="`is-${order.orderStatus}`">{{ order.orderStatusName || statusLabel(order.orderStatus) }}</strong>
-            </header>
+            </div>
 
             <div class="buyer-order-card__item">
               <div class="buyer-order-card__image" aria-hidden="true">
@@ -119,14 +119,14 @@ onMounted(() => loadOrders(true));
               </div>
             </div>
 
-            <footer class="buyer-order-card__footer">
+            <div class="buyer-order-card__footer">
               <span>下单时间：{{ order.createTime }}</span>
               <span v-if="order.orderStatus === 1 && order.payDeadline">付款截止：{{ order.payDeadline }}</span>
               <van-button v-if="order.orderStatus === 1" plain round size="small" type="primary" class="buyer-order-card__pay-button" @click="payOrder(order)">
                 去付款
               </van-button>
-            </footer>
-          </article>
+            </div>
+          </div>
         </div>
       </van-list>
     </van-pull-refresh>

@@ -126,11 +126,11 @@ async function savePassword() {
     </van-cell-group>
 
     <van-popup v-model:show="passwordEditorVisible" position="bottom" round closeable :style="{ maxHeight: '88%' }">
-      <section class="settings-sheet">
-        <header class="settings-sheet__header">
+      <div class="settings-sheet">
+        <div class="settings-sheet__header">
           <h2>修改登录密码</h2>
           <p>修改成功后需要重新登录</p>
-        </header>
+        </div>
         <van-form @submit="savePassword">
           <van-cell-group inset>
             <van-field v-model="form.password" name="password" type="password" label="新密码" placeholder="请输入 6-20 位新密码" :rules="[{ required: true, pattern: /^.{6,20}$/, message: '密码长度为 6-20 位' }]" />
@@ -142,7 +142,7 @@ async function savePassword() {
             </van-button>
           </div>
         </van-form>
-      </section>
+      </div>
     </van-popup>
   </div>
 </template>

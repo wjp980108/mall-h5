@@ -42,8 +42,8 @@ async function copyInviteCode() {
 </script>
 
 <template>
-  <section class="invite-code-page">
-    <section class="invite-card" aria-label="我的邀请码">
+  <div class="invite-code-page">
+    <div class="invite-card" aria-label="我的邀请码">
       <div class="invite-card__decoration invite-card__decoration--left" aria-hidden="true" />
       <div class="invite-card__decoration invite-card__decoration--right" aria-hidden="true" />
       <van-icon name="friends-o" class="invite-card__icon" aria-hidden="true" />
@@ -55,9 +55,9 @@ async function copyInviteCode() {
         <van-icon name="description-o" />
         复制邀请码
       </van-button>
-    </section>
+    </div>
 
-    <section class="invite-guide" aria-labelledby="invite-guide-title">
+    <div class="invite-guide" aria-labelledby="invite-guide-title">
       <h2 id="invite-guide-title">
         如何使用
       </h2>
@@ -66,12 +66,12 @@ async function copyInviteCode() {
         <li><span>2</span><p>好友注册时，在“邀请码”一栏填写该码。</p></li>
         <li><span>3</span><p>完成注册后，即可建立邀请关系。</p></li>
       </ol>
-    </section>
+    </div>
 
     <p class="invite-code-page__notice">
       邀请码仅供好友注册时使用，请勿泄露给陌生人。
     </p>
-  </section>
+  </div>
 </template>
 
 <style scoped lang="scss">

@@ -97,7 +97,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="address-list-page">
+  <div class="address-list-page">
     <van-loading v-if="loading" vertical class="address-list-page__loading">
       加载中...
     </van-loading>
@@ -123,7 +123,7 @@ onUnmounted(() => {
         <van-empty image="default" :description="isSelecting ? '暂无收货地址，请先新增' : '暂无收货地址'" />
       </template>
     </van-address-list>
-  </section>
+  </div>
 </template>
 
 <style scoped lang="scss">

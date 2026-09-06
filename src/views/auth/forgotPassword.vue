@@ -34,9 +34,9 @@ async function handleResetPassword() {
 </script>
 
 <template>
-  <main class="forgot-password-page">
-    <section class="forgot-password-page__content">
-      <section class="forgot-password-page__main" aria-label="找回密码">
+  <div class="forgot-password-page">
+    <div class="forgot-password-page__content">
+      <div class="forgot-password-page__main" aria-label="找回密码">
         <h1>找回密码</h1>
         <p>验证手机号后重设登录密码</p>
         <van-form class="auth-form" @submit="handleResetPassword">
@@ -55,9 +55,9 @@ async function handleResetPassword() {
             </button>
           </div>
         </van-form>
-      </section>
-    </section>
-  </main>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">

@@ -1,25 +1,26 @@
 <script setup lang="ts">
 import { showFailToast, showSuccessToast } from 'vant';
+import { computed } from 'vue';
+import { useUserStore } from '@/stores/user';
 
 defineOptions({ name: 'InviteCodePage' });
 
-interface InviteCodeInfo {
-  code: string;
-}
-
-// TODO: 接入用户邀请码接口后替换为接口数据。
-const inviteCodeInfo: InviteCodeInfo = {
-  code: 'MALL8F2K',
-};
+const userStore = useUserStore();
+const inviteCode = computed(() => userStore.userInfo.inviteCode || '');
 
 async function copyInviteCode() {
+  if (!inviteCode.value) {
+    showFailToast('暂无邀请码');
+    return;
+  }
+
   try {
     if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(inviteCodeInfo.code);
+      await navigator.clipboard.writeText(inviteCode.value);
     }
     else {
       const input = document.createElement('textarea');
-      input.value = inviteCodeInfo.code;
+      input.value = inviteCode.value;
       input.setAttribute('readonly', '');
       input.style.position = 'fixed';
       input.style.opacity = '0';
@@ -50,8 +51,10 @@ async function copyInviteCode() {
       <p class="invite-card__label">
         我的邀请码
       </p>
-      <strong class="invite-card__code">{{ inviteCodeInfo.code }}</strong>
-      <van-button round plain color="#fff" class="invite-card__copy" @click="copyInviteCode">
+      <strong class="invite-card__code" :class="{ 'invite-card__code--empty': !inviteCode }">
+        {{ inviteCode || '暂无邀请码' }}
+      </strong>
+      <van-button round plain class="invite-card__copy" :disabled="!inviteCode" @click="copyInviteCode">
         <van-icon name="description-o" />
         复制邀请码
       </van-button>
@@ -136,6 +139,13 @@ async function copyInviteCode() {
     font-size: 30px;
     letter-spacing: 3px;
     line-height: 42px;
+
+    &--empty {
+      color: rgb(255 255 255 / 70%);
+      font-family: inherit;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
   }
 
   &__copy {

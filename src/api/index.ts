@@ -13,6 +13,7 @@ export interface CurrentUser {
   id: number;
   username: string;
   nickname: string;
+  inviteCode: string;
   phone: string;
   avatar: string;
   avatarPlatform: string | null;

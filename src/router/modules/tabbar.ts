@@ -21,16 +21,16 @@ export default [
       keepAlive: true,
     },
   },
-  {
-    path: '/cart',
-    name: 'Cart',
-    component: () => import('@/views/cart/index.vue'),
-    meta: {
-      title: '购物车',
-      icon: 'cart-o',
-      keepAlive: true,
-    },
-  },
+  // {
+  //   path: '/cart',
+  //   name: 'Cart',
+  //   component: () => import('@/views/cart/index.vue'),
+  //   meta: {
+  //     title: '购物车',
+  //     icon: 'cart-o',
+  //     keepAlive: true,
+  //   },
+  // },
   {
     path: '/profile',
     name: 'Profile',

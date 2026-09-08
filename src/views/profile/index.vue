@@ -12,7 +12,7 @@ interface ProfileInfo {
 interface MenuItem {
   title: string;
   icon: string;
-  routeName?: 'AddressList' | 'BuyerOrders' | 'SellerOrders' | 'InviteCode' | 'PaymentManagement' | 'MyOrders';
+  routeName?: 'AddressList' | 'BuyerOrders' | 'SellerOrders' | 'InviteCode' | 'PaymentManagement' | 'MyOrders' | 'MyAssets';
 }
 
 interface MenuGroup {
@@ -55,6 +55,7 @@ const menuGroups: MenuGroup[] = [
   {
     items: [
       { title: '我的订单', icon: 'orders-o', routeName: 'MyOrders' },
+      { title: '我的资产', icon: 'balance-o', routeName: 'MyAssets' },
       // { title: '我的地址', icon: 'location-o', routeName: 'AddressList' },
       { title: '我的邀请码', icon: 'friends-o', routeName: 'InviteCode' },
       // { title: '分销中心', icon: 'chart-trending-o' },

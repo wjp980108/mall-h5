@@ -1,4 +1,5 @@
 import { checkVersion } from 'version-rocket';
+import { useAppStore } from '@/stores/app';
 import { version } from '../../package.json';
 
 export default function () {
@@ -13,7 +14,7 @@ export default function () {
     originVersionFileUrl: `${location.origin}${VITE_PUBLIC_PATH}version.json`,
     enable: MODE === 'prod',
   }, {
-    title: VITE_APP_NAME,
+    title: useAppStore().siteName || VITE_APP_NAME,
     description: '检测到新版本',
     buttonText: '立即更新',
     primaryColor: '#758AFD',

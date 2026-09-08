@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { LoginReq } from '@/api';
+import { storeToRefs } from 'pinia';
 import { showConfirmDialog } from 'vant';
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { login } from '@/api';
 import logo from '@/assets/images/logo.png';
+import { useAppStore } from '@/stores/app';
 import { useUserStore } from '@/stores/user';
 
 defineOptions({ name: 'LoginPage' });
@@ -12,13 +14,14 @@ defineOptions({ name: 'LoginPage' });
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
+const { siteLogo, siteName } = storeToRefs(useAppStore());
 const agreed = ref(false);
 const submitting = ref(false);
 const form = reactive<LoginReq>({
   account: typeof route.query.account === 'string' ? route.query.account : '',
   password: '',
 });
-const appName = import.meta.env.VITE_APP_NAME;
+const logoUrl = computed(() => siteLogo.value || logo);
 
 function passwordValidator(value: string) {
   return (value.length >= 6 && value.length <= 20) || '密码长度为 6-20 位';
@@ -55,8 +58,8 @@ async function handleLogin() {
   <div class="login-page">
     <div class="login-page__content">
       <div class="login-brand" aria-label="系统信息">
-        <img class="login-brand__logo" :src="logo" alt="系统 logo">
-        <span class="login-brand__name">{{ appName }}</span>
+        <img class="login-brand__logo" :src="logoUrl" alt="系统 logo">
+        <span class="login-brand__name">{{ siteName }}</span>
       </div>
 
       <div class="login-page__main" aria-label="欢迎登录">

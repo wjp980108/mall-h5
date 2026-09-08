@@ -1,4 +1,5 @@
 import { fmt } from 'a-calc';
+import { useAppStore } from '@/stores/app';
 
 /**
  * 设置文档标题
@@ -6,7 +7,8 @@ import { fmt } from 'a-calc';
  * @param title - 标题
  */
 export function setDocumentTitle(title: string) {
-  document.title = `${title} - ${import.meta.env.VITE_APP_NAME}`;
+  const { siteName } = useAppStore();
+  document.title = title ? `${title} - ${siteName}` : siteName;
 }
 
 /**

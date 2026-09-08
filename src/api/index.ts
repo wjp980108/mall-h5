@@ -44,6 +44,11 @@ export interface RegisterReq {
   inviteCode?: string;
 }
 
+export interface SiteSettings {
+  siteLogo: string;
+  siteName: string;
+}
+
 // 登录
 export function login(data: LoginReq) {
   return request<LoginResult>({
@@ -158,5 +163,15 @@ export function uploadImage(data: FormData) {
   }, {
     cancelDuplicateRequest: false,
     loading: '上传中...',
+  });
+}
+
+/** 获取公开的站点名称与 Logo。 */
+export function fetchSiteSettings() {
+  return request<SiteSettings>({
+    url: '/api/app/settings',
+    method: 'get',
+  }, {
+    errorMessage: false,
   });
 }

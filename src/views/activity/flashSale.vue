@@ -11,22 +11,19 @@ const notices = ref<HomeNotice[]>([]);
 const sessions = ref<FlashSaleSession[]>([]);
 const refreshing = ref(false);
 const loading = ref(false);
-const loadError = ref(false);
 
 async function loadFlashSalePage() {
   if (loading.value)
     return;
 
   loading.value = true;
-  loadError.value = false;
 
   try {
-    const [, , sessionResult] = await Promise.allSettled([
+    await Promise.allSettled([
       fetchFlashSaleBanners().then(({ data }) => { banners.value = data; }),
       fetchHomeNotices().then(({ data }) => { notices.value = data; }),
       fetchFlashSaleSessions().then(({ data }) => { sessions.value = data; }),
     ]);
-    loadError.value = sessionResult.status === 'rejected';
   }
   finally {
     loading.value = false;
@@ -83,15 +80,7 @@ onActivated(loadFlashSalePage);
             <span>限时开抢，先到先得</span>
           </div>
 
-          <van-loading v-if="loading && !sessions.length" class="page-loading" />
-
-          <van-empty v-else-if="loadError" image="error" description="加载失败">
-            <van-button round type="danger" size="small" @click="loadFlashSalePage">
-              重新加载
-            </van-button>
-          </van-empty>
-
-          <div v-else-if="sessions.length" class="session-list">
+          <div v-if="sessions.length" class="session-list">
             <router-link
               v-for="session in sessions" :key="session.id" class="session-card"
               :to="{ name: 'FlashSaleGoods', params: { sessionId: session.id } }"
@@ -191,11 +180,6 @@ onActivated(loadFlashSalePage);
         font-size: 12px;
       }
     }
-  }
-
-  .page-loading {
-    display: block;
-    margin: 36px auto;
   }
 
   .session-list {

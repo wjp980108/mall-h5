@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { UserAddress } from '@/api/address.ts';
-import type { FlashSaleGoods } from '@/api/flashSale.ts';
-import { showConfirmDialog, showToast } from 'vant';
+import type { FlashSaleGoodsDetail } from '@/api/flashSale.ts';
+import { showConfirmDialog, showSuccessToast, showToast } from 'vant';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { fetchAddressList } from '@/api/address.ts';
@@ -12,8 +12,9 @@ defineOptions({ name: 'FlashSaleGoodsDetailPage' });
 
 const route = useRoute();
 const router = useRouter();
-const goodsId = Number(route.params.id);
-const goods = ref<FlashSaleGoods | null>(null);
+const sessionProductId = Number(route.params.id);
+const validSessionProductId = Number.isSafeInteger(sessionProductId) && sessionProductId > 0;
+const goods = ref<FlashSaleGoodsDetail | null>(null);
 const loading = ref(true);
 const refreshing = ref(false);
 const loadError = ref(false);
@@ -21,16 +22,24 @@ const addresses = ref<UserAddress[]>([]);
 const addressId = ref<number>();
 const addressError = ref(false);
 const submitting = ref(false);
-const orderNo = ref('');
 const selectedAddress = computed(() => addresses.value.find(item => item.id === addressId.value));
-const canBuy = computed(() => goods.value?.canPurchase && goods.value.onlineStatus && goods.value.goodsStatus === 1 && !orderNo.value);
-const addressIdFromQuery = computed(() => {
-  const id = Number(route.query.addressId);
-  return Number.isSafeInteger(id) && id > 0 ? id : undefined;
+const canBuy = computed(() => {
+  const detail = goods.value;
+  return Boolean(detail && detail.sessionProductId > 0 && detail.stock > 0 && !detail.soldOut && detail.canPurchase && detail.goodsOnline && detail.goodsStatus === 1);
+});
+const purchaseButtonText = computed(() => {
+  const detail = goods.value;
+  if (!detail)
+    return '暂不可抢购';
+  if (detail.soldOut || detail.stock <= 0)
+    return '商品已售罄';
+  if (!detail.canPurchase)
+    return '未到抢购时间';
+  return canBuy.value ? '立即抢购' : '暂不可抢购';
 });
 
 async function loadGoods(showLoading = true) {
-  if (!Number.isSafeInteger(goodsId) || goodsId < 1) {
+  if (!validSessionProductId) {
     loading.value = false;
     loadError.value = true;
     return;
@@ -39,7 +48,7 @@ async function loadGoods(showLoading = true) {
     loading.value = true;
   loadError.value = false;
   try {
-    const { data } = await fetchFlashSaleGoodsDetail(goodsId);
+    const { data } = await fetchFlashSaleGoodsDetail(sessionProductId);
     goods.value = data;
   }
   catch {
@@ -65,8 +74,9 @@ async function loadAddresses() {
   try {
     const { data } = await fetchAddressList();
     addresses.value = data;
-    if (addressIdFromQuery.value && data.some(item => item.id === addressIdFromQuery.value))
-      addressId.value = addressIdFromQuery.value;
+    const addressIdFromQuery = Number(route.query.addressId);
+    if (Number.isSafeInteger(addressIdFromQuery) && addressIdFromQuery > 0 && data.some(item => item.id === addressIdFromQuery))
+      addressId.value = addressIdFromQuery;
     else if (!data.some(item => item.id === addressId.value))
       addressId.value = data.find(item => item.isDefault)?.id ?? data[0]?.id;
   }
@@ -103,7 +113,7 @@ async function handleBuy() {
   try {
     await showConfirmDialog({
       title: '确认抢购',
-      message: `${goods.value.goodsName}\n¥${moneyThousand(goods.value.goodsPrice)}`,
+      message: `${goods.value.goodsName}\n¥${moneyThousand(goods.value.price)}`,
       confirmButtonText: '确认下单',
     });
   }
@@ -113,8 +123,14 @@ async function handleBuy() {
   }
 
   try {
-    const { data } = await placeFlashSaleOrder({ goodsId, addressId: address.id });
-    orderNo.value = data;
+    await placeFlashSaleOrder({ sessionProductId: goods.value.sessionProductId, quantity: 1 });
+    showSuccessToast({
+      message: '抢购成功',
+      forbidClick: true,
+      onClose: () => {
+        router.replace({ name: 'MyOrders' });
+      },
+    });
   }
   catch {
     // 请求层展示后端的时段、限购或商品状态错误，刷新详情避免继续展示过期状态。
@@ -145,26 +161,21 @@ onMounted(() => {
         <van-image v-if="goods.detailImg" class="goods-cover" :src="goods.detailImg" fit="cover" />
         <div class="goods-info">
           <div class="goods-price">
-            ¥{{ moneyThousand(goods.goodsPrice) }}
+            ¥{{ moneyThousand(goods.price) }}
           </div>
           <h1>{{ goods.goodsName }}</h1>
           <van-tag v-if="goods.sessionName" plain type="danger">
             {{ goods.sessionName }}
           </van-tag>
-          <p v-if="!goods.onlineStatus">
+          <p>
+            库存：{{ goods.stock }}
+          </p>
+          <p v-if="!goods.goodsOnline">
             商品已下架
           </p>
-          <p v-else-if="goods.goodsStatusName">
-            {{ goods.goodsStatusName }}
-          </p>
-        </div>
-        <div v-if="orderNo" class="order-result" role="status">
-          <h2>下单成功，待付款</h2>
-          <p>订单号：{{ orderNo }}</p>
-          <p>请在下单后 30 分钟内完成付款。</p>
         </div>
         <van-cell
-          v-else title="收货地址" is-link :disabled="submitting"
+          title="收货地址" is-link :disabled="submitting"
           :label="selectedAddress ? `${selectedAddress.receiverName} ${selectedAddress.receiverPhone} ${selectedAddress.address}` : '请选择收货地址'"
           @click="openAddresses"
         />
@@ -176,7 +187,7 @@ onMounted(() => {
       </van-pull-refresh>
       <div class="detail-actions">
         <van-button round block type="danger" :disabled="!canBuy" :loading="submitting" @click="handleBuy">
-          {{ orderNo ? '已下单' : !goods.canPurchase ? '未到抢购时间' : canBuy ? '立即抢购' : '暂不可抢购' }}
+          {{ purchaseButtonText }}
         </van-button>
       </div>
     </template>
@@ -196,8 +207,7 @@ onMounted(() => {
   }
 
   .goods-info,
-  .goods-description,
-  .order-result {
+  .goods-description {
     padding: 16px;
     margin-bottom: 12px;
     background: #fff;
@@ -229,10 +239,6 @@ onMounted(() => {
       max-width: 100%;
       height: auto;
     }
-  }
-
-  .order-result {
-    background: #fff7e8;
   }
 
   .detail-actions {

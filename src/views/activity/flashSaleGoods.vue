@@ -16,8 +16,8 @@ const session = ref<FlashSaleSession>();
 const goods = ref<FlashSaleGoods[]>([]);
 const nextPage = ref(1);
 const loading = ref(false);
-const refreshing = ref(false);
 const loadError = ref(false);
+const refreshing = ref(false);
 const finished = ref(false);
 let requesting = false;
 let countdownTimer: ReturnType<typeof window.setTimeout> | undefined;
@@ -83,16 +83,15 @@ async function loadGoods(targetPage: number) {
   requesting = true;
   loading.value = true;
   nextPage.value = targetPage;
-  loadError.value = false;
   try {
     const { data } = await fetchFlashSaleGoods({ sessionId, pageNum: targetPage, pageSize: 10 });
     goods.value = targetPage === 1 ? data.list : [...goods.value, ...data.list];
     nextPage.value = targetPage + 1;
     finished.value = goods.value.length >= data.total;
+    loadError.value = false;
   }
   catch {
     loadError.value = true;
-    finished.value = false;
   }
   finally {
     requesting = false;
@@ -101,6 +100,7 @@ async function loadGoods(targetPage: number) {
 }
 
 async function handleRefresh() {
+  loadError.value = false;
   try {
     await Promise.all([loadSession(), loadGoods(1)]);
   }
@@ -127,20 +127,25 @@ onUnmounted(() => {
     <van-empty v-if="!validSessionId" description="场次不存在" />
     <van-pull-refresh v-else v-model="refreshing" :disabled="loading" @refresh="handleRefresh">
       <van-list
-        v-model:loading="loading" v-model:error="loadError"
+        v-model:error="loadError"
+        v-model:loading="loading"
         :disabled="refreshing" :finished="finished"
+        error-text="加载失败，点击重试"
         :finished-text="goods.length ? '没有更多了' : ''"
-        error-text="加载失败，点击重试" @load="loadGoods(nextPage)"
+        @load="loadGoods(nextPage)"
       >
         <div v-if="goods.length" class="waterfall-list flash-sale-goods__list">
           <router-link
             v-for="item in goods" :key="item.id" class="waterfall-list__item goods-card"
-            :to="{ name: 'FlashSaleGoodsDetail', params: { id: item.id } }"
+            :to="{
+              name: 'FlashSaleGoodsDetail',
+              params: { id: item.id },
+            }"
           >
             <van-image
               class="goods-card__image"
               lazy-load
-              :src="item.coverImg || undefined"
+              :src="item.goodsThumb || undefined"
               fit="cover"
             >
               <template #error>
@@ -153,18 +158,20 @@ onUnmounted(() => {
                 {{ item.goodsName }}
               </h2>
               <div class="goods-card__footer">
-                <span class="goods-card__price">¥{{ moneyThousand(item.goodsPrice) }}</span>
-                <span class="goods-card__action">
-                  {{ item.onlineStatus ? '去抢购' : '已下架' }}
-                  <van-icon name="arrow" />
-                </span>
+                <div>
+                  <span class="goods-card__price">¥{{ moneyThousand(item.price) }}</span>
+                  <p class="goods-card__stock">
+                    库存：{{ item.stock }}
+                  </p>
+                </div>
+                <span class="goods-card__action">去抢购<van-icon name="arrow" /></span>
               </div>
             </div>
           </router-link>
         </div>
       </van-list>
       <van-empty
-        v-if="finished && !goods.length && !loadError"
+        v-if="finished && !goods.length"
         description="暂无可抢购商品，请稍后刷新"
       />
     </van-pull-refresh>
@@ -249,6 +256,13 @@ onUnmounted(() => {
       font-weight: 700;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    &__stock {
+      margin: 3px 0 0;
+      color: #969799;
+      font-size: 11px;
+      line-height: 16px;
     }
 
     &__action {

@@ -9,6 +9,7 @@ export default [
       title: '首页',
       icon: 'wap-home-o',
       keepAlive: true,
+      requiresAuth: false,
     },
   },
   {

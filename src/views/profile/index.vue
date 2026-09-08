@@ -35,29 +35,29 @@ const avatarUrl = computed(() => {
 });
 
 const menuGroups: MenuGroup[] = [
+  // {
+  //   items: [
+  //     { title: '权益券', icon: 'coupon-o' },
+  //   ],
+  // },
+  // {
+  //   title: '买方服务',
+  //   items: [
+  //     { title: '我的仓库', icon: 'bag-o', routeName: 'BuyerOrders' },
+  //   ],
+  // },
+  // {
+  //   title: '卖方服务',
+  //   items: [
+  //     { title: '我的仓库', icon: 'shop-o', routeName: 'SellerOrders' },
+  //   ],
+  // },
   {
     items: [
-      { title: '权益券', icon: 'coupon-o' },
-    ],
-  },
-  {
-    title: '买方服务',
-    items: [
-      { title: '我的仓库', icon: 'bag-o', routeName: 'BuyerOrders' },
-    ],
-  },
-  {
-    title: '卖方服务',
-    items: [
-      { title: '我的仓库', icon: 'shop-o', routeName: 'SellerOrders' },
-    ],
-  },
-  {
-    items: [
-      { title: '我的地址', icon: 'location-o', routeName: 'AddressList' },
+      // { title: '我的地址', icon: 'location-o', routeName: 'AddressList' },
       { title: '我的邀请码', icon: 'friends-o', routeName: 'InviteCode' },
-      { title: '分销中心', icon: 'chart-trending-o' },
-      { title: '收款管理', icon: 'balance-o', routeName: 'PaymentManagement' },
+      // { title: '分销中心', icon: 'chart-trending-o' },
+      // { title: '收款管理', icon: 'balance-o', routeName: 'PaymentManagement' },
     ],
   },
 ];

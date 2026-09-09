@@ -46,33 +46,35 @@ onActivated(loadFlashSalePage);
   <div class="flash-sale-page">
     <van-pull-refresh v-model="refreshing" :disabled="loading" @refresh="handleRefresh">
       <div class="flash-sale-page__content">
-        <van-swipe
-          v-if="banners.length"
-          class="banner-swipe"
-          :autoplay="3500"
-          indicator-color="#fff"
-        >
-          <van-swipe-item v-for="banner in banners" :key="banner.id">
-            <van-image :src="banner.imgUrl" fit="cover" width="100%" height="100%" />
-          </van-swipe-item>
-        </van-swipe>
-
-        <van-notice-bar
-          v-if="notices.length"
-          class="flash-sale-notice"
-          background="#fff4f0"
-          color="#e85032"
-          left-icon="volume-o"
-          :scrollable="false"
-        >
-          <van-swipe vertical class="notice-swipe" :autoplay="3000" :show-indicators="false">
-            <van-swipe-item v-for="notice in notices" :key="notice.id">
-              <router-link class="notice-item" :to="{ name: 'NoticeDetail', params: { id: notice.id } }">
-                {{ notice.title }}
-              </router-link>
+        <div v-if="banners.length || notices.length" class="flash-sale-page__promotions">
+          <van-swipe
+            v-if="banners.length"
+            class="banner-swipe"
+            :autoplay="3500"
+            indicator-color="#fff"
+          >
+            <van-swipe-item v-for="banner in banners" :key="banner.id">
+              <van-image :src="banner.imgUrl" fit="cover" width="100%" height="100%" />
             </van-swipe-item>
           </van-swipe>
-        </van-notice-bar>
+
+          <van-notice-bar
+            v-if="notices.length"
+            class="flash-sale-notice"
+            background="#fff4f0"
+            color="#e85032"
+            left-icon="volume-o"
+            :scrollable="false"
+          >
+            <van-swipe vertical class="notice-swipe" :autoplay="3000" :show-indicators="false">
+              <van-swipe-item v-for="notice in notices" :key="notice.id">
+                <router-link class="notice-item" :to="{ name: 'NoticeDetail', params: { id: notice.id } }">
+                  {{ notice.title }}
+                </router-link>
+              </van-swipe-item>
+            </van-swipe>
+          </van-notice-bar>
+        </div>
 
         <div class="session-section">
           <div class="session-section__header">
@@ -116,7 +118,16 @@ onActivated(loadFlashSalePage);
   }
 
   &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     padding: 12px;
+  }
+
+  &__promotions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   .banner-swipe {
@@ -131,7 +142,6 @@ onActivated(loadFlashSalePage);
   }
 
   .flash-sale-notice {
-    margin-top: 12px;
     border-radius: 8px;
 
     :deep(.van-notice-bar__content) {
@@ -160,13 +170,14 @@ onActivated(loadFlashSalePage);
   }
 
   .session-section {
-    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 
     &__header {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
-      margin-bottom: 12px;
 
       h1 {
         margin: 0;

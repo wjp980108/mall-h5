@@ -202,8 +202,11 @@ onUnmounted(() => {
     &__image {
       display: block;
       width: 100%;
-      aspect-ratio: 4 / 3;
       background: #f2f3f5;
+
+      :deep(.van-image__img) {
+        height: auto;
+      }
 
       :deep(.van-image__error) {
         color: #c8c9cc;

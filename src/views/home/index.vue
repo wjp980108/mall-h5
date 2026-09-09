@@ -179,6 +179,7 @@ onMounted(loadPromotions);
     display: flex;
     flex: 1;
     flex-direction: column;
+    gap: 12px;
     padding: 12px;
 
     .banner-swipe {
@@ -192,7 +193,6 @@ onMounted(loadPromotions);
     }
 
     .home-notice {
-      margin-top: 12px;
       border-radius: 8px;
 
       :deep(.van-notice-bar__content) {
@@ -219,10 +219,10 @@ onMounted(loadPromotions);
       min-height: 0;
       flex: 1;
       flex-direction: column;
-      margin-top: 12px;
 
       :deep(.van-empty) {
         flex: 1;
+        padding: 0;
       }
 
       .product-card {

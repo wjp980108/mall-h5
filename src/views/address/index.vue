@@ -75,13 +75,27 @@ function selectAddress(address: AddressListAddress) {
     return;
 
   const target = router.resolve(returnTo.value);
-  router.replace({
+  const targetLocation = {
     path: target.path,
     query: {
       ...target.query,
       addressId: String(address.id),
     },
-  });
+  };
+
+  // 从商品详情进入时，返回原详情记录后再原地更新地址，避免留下两条详情历史记录。
+  if (window.history.state?.back === target.fullPath) {
+    const removeAfterEach = router.afterEach((to) => {
+      removeAfterEach();
+      if (to.fullPath === target.fullPath)
+        router.replace(targetLocation);
+    });
+    router.back();
+    return;
+  }
+
+  // 兼容直接打开地址选择页等没有原详情记录的场景。
+  router.replace(targetLocation);
 }
 
 onMounted(() => {

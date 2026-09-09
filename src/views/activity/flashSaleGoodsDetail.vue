@@ -29,13 +29,9 @@ const canBuy = computed(() => {
 });
 const purchaseButtonText = computed(() => {
   const detail = goods.value;
-  if (!detail)
-    return '暂不可抢购';
-  if (detail.soldOut || detail.stock <= 0)
-    return '商品已售罄';
-  if (!detail.canPurchase)
-    return '未到抢购时间';
-  return canBuy.value ? '立即抢购' : '暂不可抢购';
+  if (canBuy.value)
+    return '立即抢购';
+  return detail && (detail.soldOut || detail.stock <= 0) ? '商品已售罄' : '暂不可抢购';
 });
 
 async function loadGoods(showLoading = true) {

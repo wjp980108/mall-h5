@@ -31,11 +31,21 @@ onMounted(loadAgreement);
 
 <style scoped lang="scss">
 .agreement-page {
-  min-height: 100%;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--van-background);
 
   .agreement-page__main {
-    padding: 16px;
+    min-height: 0;
+    flex: 1;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
     box-sizing: border-box;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .agreement-page__skeleton {

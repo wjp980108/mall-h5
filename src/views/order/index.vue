@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { RobOrder, RobOrderStatus } from '@/api/robOrder';
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { fetchMyRobOrders } from '@/api/robOrder';
 import { moneyThousand } from '@/utils/money';
 
@@ -12,6 +13,7 @@ const finished = ref(false);
 const pageNum = ref(1);
 const pageSize = 10;
 const orders = ref<RobOrder[]>([]);
+const router = useRouter();
 
 function statusLabel(status: RobOrderStatus) {
   return {
@@ -52,6 +54,10 @@ async function refreshOrders() {
   }
 }
 
+function viewOrderDetail(order: RobOrder) {
+  router.push({ name: 'RobOrderDetail', params: { id: order.id } });
+}
+
 onMounted(() => loadOrders(true));
 </script>
 
@@ -62,7 +68,7 @@ onMounted(() => loadOrders(true));
 
       <van-list v-else v-model:loading="loading" :finished="finished" finished-text="没有更多订单了" @load="loadOrders">
         <div class="my-order-list">
-          <div v-for="order in orders" :key="order.id" class="my-order-card">
+          <button v-for="order in orders" :key="order.id" type="button" class="my-order-card" @click="viewOrderDetail(order)">
             <div class="my-order-card__header">
               <span>订单号：{{ order.orderNo }}</span>
               <strong :class="`is-${order.orderStatus}`">{{ order.orderStatusName || statusLabel(order.orderStatus) }}</strong>
@@ -87,9 +93,12 @@ onMounted(() => loadOrders(true));
 
             <div class="my-order-card__footer">
               <span>下单时间：{{ order.createTime }}</span>
-              <p>共 {{ order.quantity }} 件，合计 <strong>¥{{ moneyThousand(order.totalAmount) }}</strong></p>
+              <p>
+                共 {{ order.quantity }} 件，合计 <strong>¥{{ moneyThousand(order.totalAmount) }}</strong>
+                <van-icon name="arrow" />
+              </p>
             </div>
-          </div>
+          </button>
         </div>
       </van-list>
     </van-pull-refresh>
@@ -114,9 +123,20 @@ onMounted(() => loadOrders(true));
 }
 
 .my-order-card {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   overflow: hidden;
   border-radius: 12px;
   background: #fff;
+
+  &:active {
+    background: #fafafa;
+  }
 
   &__header,
   &__footer {
@@ -227,6 +247,11 @@ onMounted(() => loadOrders(true));
       strong {
         color: #ee0a24;
         font-size: 14px;
+      }
+
+      .van-icon {
+        margin-left: 4px;
+        color: #c8c9cc;
       }
     }
   }

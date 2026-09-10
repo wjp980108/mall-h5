@@ -31,6 +31,9 @@ export interface RobOrder {
   orderStatus: RobOrderStatus;
   orderStatusName: string;
   createTime: string;
+  receiverName?: string;
+  receiverPhone?: string;
+  receiveAddress?: string;
 }
 
 export interface FetchRobOrdersParams {
@@ -43,6 +46,15 @@ export function fetchMyRobOrders(params: FetchRobOrdersParams) {
   return request<AppAxios.PageData<RobOrder>>({
     url: '/api/app/robOrder/my-list',
     params,
+  }, {
+    loading: true,
+  });
+}
+
+/** 获取当前用户的抢购订单详情。 */
+export function fetchRobOrder(id: number | string) {
+  return request<RobOrder>({
+    url: `/api/app/robOrder/${id}`,
   }, {
     loading: true,
   });

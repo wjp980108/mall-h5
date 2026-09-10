@@ -119,7 +119,11 @@ async function handleBuy() {
   }
 
   try {
-    await placeFlashSaleOrder({ sessionProductId: goods.value.sessionProductId, quantity: 1 });
+    await placeFlashSaleOrder({
+      sessionProductId: goods.value.sessionProductId,
+      addressId: address.id,
+      quantity: 1,
+    });
     showSuccessToast({
       message: '抢购成功',
       forbidClick: true,

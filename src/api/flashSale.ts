@@ -77,6 +77,8 @@ export interface FetchFlashSaleGoodsParams {
 export interface PlaceFlashSaleOrderPayload {
   /** 场次商品关联 ID。 */
   sessionProductId: number;
+  /** 收货地址 ID。 */
+  addressId: number;
   /** 购买数量；抢购页面当前固定为 1。 */
   quantity: number;
 }

@@ -188,9 +188,6 @@ onMounted(async () => {
                 <strong>{{ flow.flowTypeName || flow.bizTypeName }}</strong>
                 <p>
                   {{ flow.remark || flow.accountTypeName }}
-                  <template v-if="flow.counterpartyName">
-                    · {{ flow.counterpartyName }}
-                  </template>
                 </p>
                 <time>{{ flow.createTime }}</time>
               </div>

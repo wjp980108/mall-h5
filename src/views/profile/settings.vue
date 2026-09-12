@@ -83,7 +83,7 @@ async function savePassword() {
 
   passwordSaving.value = true;
   try {
-    await changePassword({ phone: userStore.userInfo.phone, password: form.password });
+    await changePassword(form.password);
     passwordEditorVisible.value = false;
     userStore.handleLogout();
     await router.replace('/login');

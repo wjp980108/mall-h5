@@ -25,13 +25,8 @@ export interface UpdateCurrentUserInfo {
   avatarPlatform?: string;
 }
 
-export interface ChangePasswordPayload {
-  phone: string;
-  password: string;
-}
-
 export interface ForgotPasswordPayload {
-  phone: string;
+  account: string;
   password: string;
 }
 
@@ -91,11 +86,13 @@ export function updateUserInfo(data: UpdateCurrentUserInfo) {
 }
 
 // 修改密码
-export function changePassword(data: ChangePasswordPayload) {
+export function changePassword(password: string) {
   return request({
     url: '/api/app/user/password',
     method: 'put',
-    data,
+    data: {
+      password,
+    },
   }, {
     loading: '修改中...',
     successMessage: '密码已修改，请重新登录',

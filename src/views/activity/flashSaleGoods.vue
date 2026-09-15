@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import type { FlashSaleGoods, FlashSaleSession } from '@/api/flashSale.ts';
+import { showConfirmDialog, showSuccessToast, showToast } from 'vant';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { fetchFlashSaleGoods, fetchFlashSaleSessions } from '@/api/flashSale.ts';
+import { useRoute, useRouter } from 'vue-router';
+import { fetchAddressList } from '@/api/address.ts';
+import { fetchFlashSaleGoods, fetchFlashSaleGoodsDetail, fetchFlashSaleSessions, placeFlashSaleOrder } from '@/api/flashSale.ts';
 import { useNavTitle } from '@/hooks/useNavTitle.ts';
 import { moneyThousand } from '@/utils/money.ts';
 
 defineOptions({ name: 'FlashSaleGoodsPage' });
 
 const route = useRoute();
+const router = useRouter();
 const { setNavCountdown, setNavTitle } = useNavTitle();
 const sessionId = Number(route.params.sessionId);
 const validSessionId = Number.isSafeInteger(sessionId) && sessionId > 0;
@@ -19,6 +22,7 @@ const loading = ref(false);
 const loadError = ref(false);
 const refreshing = ref(false);
 const finished = ref(false);
+const orderingGoodsId = ref<number>();
 let requesting = false;
 let countdownTimer: ReturnType<typeof window.setTimeout> | undefined;
 const title = computed(() => session.value?.sessionName || '抢购商品');
@@ -109,6 +113,89 @@ async function handleRefresh() {
   }
 }
 
+function getUnavailableMessage(detail: Awaited<ReturnType<typeof fetchFlashSaleGoodsDetail>>['data']) {
+  if (!detail)
+    return '商品不存在';
+  if (detail.soldOut || detail.stock <= 0)
+    return '商品已售罄';
+  return '暂不可抢购';
+}
+
+function canPlaceOrder(detail: Exclude<Awaited<ReturnType<typeof fetchFlashSaleGoodsDetail>>['data'], null>) {
+  return detail.sessionProductId > 0
+    && detail.stock > 0
+    && !detail.soldOut
+    && detail.canPurchase
+    && detail.goodsOnline
+    && detail.goodsStatus === 1;
+}
+
+async function placeOrder(item: FlashSaleGoods) {
+  if (orderingGoodsId.value)
+    return;
+
+  orderingGoodsId.value = item.id;
+  try {
+    // 列表展示的库存可能已变化，下单前重新读取商品与地址，沿用详情页的校验规则。
+    const [{ data: detail }, { data: addresses }] = await Promise.all([
+      fetchFlashSaleGoodsDetail(item.id),
+      fetchAddressList(),
+    ]);
+    if (!detail || !canPlaceOrder(detail)) {
+      showToast(getUnavailableMessage(detail));
+      return;
+    }
+
+    const address = addresses.find(item => item.isDefault) ?? addresses[0];
+    if (!address) {
+      showToast({
+        message: '请先选择收货地址',
+        forbidClick: true,
+        onClose: () => {
+          router.push({
+            name: 'AddressList',
+            query: {
+              select: '1',
+              returnTo: route.fullPath,
+            },
+          });
+        },
+      });
+      return;
+    }
+
+    try {
+      await showConfirmDialog({
+        title: '确认抢购',
+        message: `${detail.goodsName}\n¥${moneyThousand(detail.price)}\n收货地址：${address.receiverName} ${address.receiverPhone} ${address.address}`,
+        confirmButtonText: '确认下单',
+      });
+    }
+    catch {
+      return;
+    }
+
+    await placeFlashSaleOrder({
+      sessionProductId: detail.sessionProductId,
+      addressId: address.id,
+      quantity: 1,
+    });
+    showSuccessToast({
+      message: '抢购成功',
+      forbidClick: true,
+      onClose: () => {
+        router.replace({ name: 'MyOrders' });
+      },
+    });
+  }
+  catch {
+    // 请求层负责展示获取商品、地址或下单失败的具体原因。
+  }
+  finally {
+    orderingGoodsId.value = undefined;
+  }
+}
+
 onMounted(() => {
   if (validSessionId)
     loadSession();
@@ -135,28 +222,30 @@ onUnmounted(() => {
         @load="loadGoods(nextPage)"
       >
         <div v-if="goods.length" class="waterfall-list flash-sale-goods__list">
-          <router-link
-            v-for="item in goods" :key="item.id" class="waterfall-list__item goods-card"
-            :to="{
-              name: 'FlashSaleGoodsDetail',
-              params: { id: item.id },
-            }"
-          >
-            <van-image
-              class="goods-card__image"
-              lazy-load
-              :src="item.goodsThumb || undefined"
-              fit="cover"
+          <div v-for="item in goods" :key="item.id" class="waterfall-list__item goods-card">
+            <router-link
+              class="goods-card__detail"
+              :to="{
+                name: 'FlashSaleGoodsDetail',
+                params: { id: item.id },
+              }"
             >
-              <template #error>
-                <van-icon name="photo-o" />
-              </template>
-            </van-image>
-            <div class="goods-card__content">
+              <van-image
+                class="goods-card__image"
+                lazy-load
+                :src="item.goodsThumb || undefined"
+                fit="cover"
+              >
+                <template #error>
+                  <van-icon name="photo-o" />
+                </template>
+              </van-image>
               <span class="goods-card__session">{{ item.sessionName || title }}</span>
               <h2 class="goods-card__name">
                 {{ item.goodsName }}
               </h2>
+            </router-link>
+            <div class="goods-card__content">
               <div class="goods-card__footer">
                 <div>
                   <span class="goods-card__price">¥{{ moneyThousand(item.price) }}</span>
@@ -164,10 +253,22 @@ onUnmounted(() => {
                     库存：{{ item.stock }}
                   </p>
                 </div>
-                <span class="goods-card__action">去抢购<van-icon name="arrow" /></span>
+              </div>
+              <div class="goods-card__actions">
+                <van-button
+                  round
+                  size="small"
+                  type="danger"
+                  class="goods-card__action"
+                  :loading="orderingGoodsId === item.id"
+                  :disabled="Boolean(orderingGoodsId)"
+                  @click="placeOrder(item)"
+                >
+                  抢购
+                </van-button>
               </div>
             </div>
-          </router-link>
+          </div>
         </div>
       </van-list>
       <van-empty
@@ -191,13 +292,17 @@ onUnmounted(() => {
   }
 
   .goods-card {
-    display: block;
     overflow: hidden;
     color: inherit;
-    text-decoration: none;
     border-radius: 14px;
     background: #fff;
     box-shadow: 0 4px 12px rgb(31 35 41 / 6%);
+
+    &__detail {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+    }
 
     &__image {
       display: block;
@@ -216,12 +321,13 @@ onUnmounted(() => {
     }
 
     &__content {
-      padding: 8px 9px 10px;
+      padding: 0 9px 10px;
     }
 
     &__session {
       display: inline-flex;
       max-width: 100%;
+      margin: 8px 9px 0;
       padding: 1px 5px;
       overflow: hidden;
       color: #ee0a24;
@@ -235,7 +341,7 @@ onUnmounted(() => {
 
     &__name {
       min-height: 20px;
-      margin: 5px 0 7px;
+      margin: 5px 9px 7px;
       overflow: hidden;
       color: #323233;
       font-size: 14px;
@@ -248,8 +354,6 @@ onUnmounted(() => {
     &__footer {
       display: flex;
       align-items: baseline;
-      justify-content: space-between;
-      gap: 6px;
     }
 
     &__price {
@@ -268,16 +372,23 @@ onUnmounted(() => {
       line-height: 16px;
     }
 
-    &__action {
-      display: inline-flex;
-      align-items: center;
-      flex-shrink: 0;
-      color: #ee0a24;
-      font-size: 11px;
-      line-height: 18px;
+    &__actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 6px;
+    }
 
-      .van-icon {
-        margin-left: 1px;
+    &__action {
+      width: 78px;
+      --van-button-small-height: 26px;
+      --van-button-small-font-size: 11px;
+
+      background: linear-gradient(100deg, #ff5f63, #ee0a24);
+      border: 0;
+      box-shadow: 0 2px 6px rgb(238 10 36 / 16%);
+
+      &.van-button--disabled {
+        opacity: 0.55;
       }
     }
   }

@@ -18,6 +18,16 @@ body,
   overflow: hidden;
 }
 
+// iOS Safari enlarges the viewport when focusing text controls smaller than 16px.
+// Keep the visual control text at that threshold without changing the app's base type scale.
+@media (hover: none) and (pointer: coarse) {
+  input:not([type='hidden']),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 #app > .van-config-provider {
   height: 100%;
   min-height: 0;

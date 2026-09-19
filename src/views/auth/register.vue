@@ -4,6 +4,7 @@ import { showConfirmDialog, showToast } from 'vant';
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { register } from '@/api';
+import { notifyFormValidationFailed } from '@/utils/form';
 
 defineOptions({ name: 'RegisterPage' });
 
@@ -73,7 +74,14 @@ async function handleRegister() {
       <div class="register-page__main" aria-label="注册账号">
         <h1>注册账号</h1>
         <p>设置账号与密码，完成后即可登录购物</p>
-        <van-form class="auth-form" @submit="handleRegister">
+        <van-form
+          class="auth-form"
+          :show-error="false"
+          :show-error-message="false"
+          validate-trigger="onSubmit"
+          @failed="notifyFormValidationFailed"
+          @submit="handleRegister"
+        >
           <van-cell-group inset>
             <van-field
               v-model.trim="form.username" name="username" label="用户名"
@@ -194,10 +202,6 @@ async function handleRegister() {
     &::after {
       display: none;
     }
-  }
-
-  :deep(.van-field--error) {
-    box-shadow: 0 0 0 1px rgb(238 10 36 / 55%);
   }
 
   :deep(.van-field__label) {

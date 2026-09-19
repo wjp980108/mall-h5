@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PointsFlow } from '@/api/assets';
-import { showToast } from 'vant';
+import { showNotify } from 'vant';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { fetchPointsBalance, fetchPointsFlows, transferPoints } from '@/api/assets';
 
@@ -94,17 +94,17 @@ function useAllPoints() {
 
 function validateTransfer() {
   if (!/^1\d{10}$/.test(transferForm.phone)) {
-    showToast('请输入正确的对方手机号');
+    showNotify({ type: 'danger', message: '请输入正确的对方手机号' });
     return false;
   }
 
   if (!Number.isFinite(transferAmount.value) || transferAmount.value <= 0) {
-    showToast('请输入大于 0 的转让积分');
+    showNotify({ type: 'danger', message: '请输入大于 0 的转让积分' });
     return false;
   }
 
   if (transferAmount.value > balance.points) {
-    showToast('转让积分不能超过可用积分');
+    showNotify({ type: 'danger', message: '转让积分不能超过可用积分' });
     return false;
   }
 

@@ -2,6 +2,7 @@
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { forgotPassword } from '@/api';
+import { notifyFormValidationFailed } from '@/utils/form';
 
 defineOptions({ name: 'ForgotPasswordPage' });
 
@@ -36,7 +37,14 @@ async function handleResetPassword() {
       <div class="forgot-password-page__main" aria-label="重置密码">
         <h1>重置密码</h1>
         <p>验证用户名后重设登录密码</p>
-        <van-form class="auth-form" @submit="handleResetPassword">
+        <van-form
+          class="auth-form"
+          :show-error="false"
+          :show-error-message="false"
+          validate-trigger="onSubmit"
+          @failed="notifyFormValidationFailed"
+          @submit="handleResetPassword"
+        >
           <van-cell-group inset>
             <van-field v-model.trim="form.account" name="account" label="用户名" left-icon="user-o" placeholder="请输入用户名" autocomplete="username" :rules="[{ required: true, message: '请输入用户名' }]" />
             <van-field v-model.trim="form.verificationCode" name="verificationCode" maxlength="6" label="验证码" left-icon="shield-o" placeholder="请输入 6 位字母或数字" :rules="[{ required: true, message: '请输入验证码' }, { validator: verificationCodeValidator }]" />
@@ -114,10 +122,6 @@ async function handleResetPassword() {
     &::after {
       display: none;
     }
-  }
-
-  :deep(.van-field--error) {
-    box-shadow: 0 0 0 1px rgb(238 10 36 / 55%);
   }
 
   :deep(.van-field__label) {

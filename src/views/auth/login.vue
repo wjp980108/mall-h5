@@ -8,6 +8,7 @@ import { login } from '@/api';
 import logo from '@/assets/images/logo.png';
 import { useAppStore } from '@/stores/app';
 import { useUserStore } from '@/stores/user';
+import { notifyFormValidationFailed } from '@/utils/form';
 
 defineOptions({ name: 'LoginPage' });
 
@@ -65,12 +66,19 @@ async function handleLogin() {
       <div class="login-page__main" aria-label="欢迎登录">
         <h1>欢迎登录</h1>
         <p>登录后即可开始安心购物</p>
-        <van-form class="auth-form" @submit="handleLogin">
+        <van-form
+          class="auth-form"
+          :show-error="false"
+          :show-error-message="false"
+          validate-trigger="onSubmit"
+          @failed="notifyFormValidationFailed"
+          @submit="handleLogin"
+        >
           <van-cell-group inset>
             <van-field
-              v-model.trim="form.account" name="account" label="账号" left-icon="user-o"
-              placeholder="请输入手机号或用户名" autocomplete="username" clearable
-              :rules="[{ required: true, message: '请输入手机号或用户名' }]"
+              v-model.trim="form.account" name="account" label="用户名" left-icon="user-o"
+              placeholder="请输入用户名" autocomplete="username" clearable
+              :rules="[{ required: true, message: '请输入用户名' }]"
             />
             <van-field
               v-model="form.password" name="password" type="password" label="密码"
@@ -187,10 +195,6 @@ async function handleLogin() {
     &::after {
       display: none;
     }
-  }
-
-  :deep(.van-field--error) {
-    box-shadow: 0 0 0 1px rgb(238 10 36 / 55%);
   }
 
   :deep(.van-field__label) {

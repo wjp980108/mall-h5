@@ -5,6 +5,7 @@ import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { changePassword, updateUserInfo, uploadImage } from '@/api';
 import { useUserStore } from '@/stores/user';
+import { notifyFormValidationFailed } from '@/utils/form';
 
 defineOptions({ name: 'ProfileSettingsPage' });
 
@@ -96,7 +97,13 @@ async function savePassword() {
 
 <template>
   <div class="settings-page">
-    <van-form @submit="saveInfo">
+    <van-form
+      :show-error="false"
+      :show-error-message="false"
+      validate-trigger="onSubmit"
+      @failed="notifyFormValidationFailed"
+      @submit="saveInfo"
+    >
       <van-cell-group inset title="个人资料">
         <van-field v-model.trim="form.nickname" label="昵称" maxlength="20" placeholder="请输入昵称" :rules="[{ pattern: /^$|^.{2,20}$/, message: '昵称长度为 2-20 位' }]" />
         <van-field name="avatar" label="头像">
@@ -131,7 +138,13 @@ async function savePassword() {
           <h2>修改登录密码</h2>
           <p>修改成功后需要重新登录</p>
         </div>
-        <van-form @submit="savePassword">
+        <van-form
+          :show-error="false"
+          :show-error-message="false"
+          validate-trigger="onSubmit"
+          @failed="notifyFormValidationFailed"
+          @submit="savePassword"
+        >
           <van-cell-group inset>
             <van-field v-model="form.password" name="password" type="password" label="新密码" placeholder="请输入 6-20 位新密码" :rules="[{ required: true, pattern: /^.{6,20}$/, message: '密码长度为 6-20 位' }]" />
             <van-field v-model="form.confirmPassword" name="confirmPassword" type="password" label="确认密码" placeholder="请再次输入新密码" :rules="[{ required: true, message: '请再次输入新密码' }]" />
